@@ -20,6 +20,7 @@ using Signa.TemplateCore.Api.Security;
 using Microsoft.Extensions.Options;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.Extensions.Logging;
 
 namespace Signa.TemplateCore.Api
 {
@@ -158,6 +159,21 @@ namespace Signa.TemplateCore.Api
                     .RequireAuthenticatedUser().Build());
             });
             #endregion
+
+            #region :: AutoMapper ::
+            var config = new AutoMapper.MapperConfiguration(cfg =>
+            {
+            });
+
+            IMapper mapper = config.CreateMapper();
+            services.AddSingleton(mapper);
+            #endregion
+
+            services.AddLogging(loggingBuilder =>
+            {
+                loggingBuilder.AddConsole();
+                loggingBuilder.AddDebug();
+            });
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -167,16 +183,51 @@ namespace Signa.TemplateCore.Api
             {
                 app.UseDeveloperExceptionPage();
             }
-
-            app.UseRouting();
-
-            app.UseEndpoints(endpoints =>
+            else
             {
-                endpoints.MapGet("/", async context =>
-                {
-                    await context.Response.WriteAsync("Hello World!");
-                });
+                app.UseDeveloperExceptionPage();
+                app.UseHsts();
+            }
+
+            app.UseSwagger(c =>
+            {
+                c.RouteTemplate = "docs/{documentName}/swagger.json";
             });
+
+            app.UseSwaggerUI(c =>
+            {
+                c.RoutePrefix = "docs";
+                c.SwaggerEndpoint("./v1/swagger.json", "API Login Ecargo");
+            });
+
+            app.UseHttpsRedirection();
+            app.UseResponseCompression();
+            app.UseAuthentication();
+
+            app.UseMiddleware(typeof(ErrorHandlingMiddleware));
+
+            #region :: Middleware Claims from JWT ::
+            //https://www.wellingtonjhn.com/posts/obtendo-o-usu%C3%A1rio-logado-em-apis-asp.net-core/
+            app.Use(async delegate (HttpContext httpContext, Func<Task> next)
+            {
+                if (httpContext.User.Claims.Any())
+                {
+                    Globals.UserId = int.Parse(httpContext.User.Claims.Where(c => c.Type == "UserId").FirstOrDefault().Value);
+                    Globals.UserGroupId = int.Parse(httpContext.User.Claims.Where(c => c.Type == "UserGroupId")?.FirstOrDefault().Value);
+                }
+
+                await next.Invoke();
+            });
+            #endregion
+
+            app.UseCors(config =>
+            {
+                config.AllowAnyHeader();
+                config.AllowAnyMethod();
+                config.AllowAnyOrigin();
+            });
+
+            app.UseMvc();
         }
     }
 }
