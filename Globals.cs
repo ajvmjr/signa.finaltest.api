@@ -1,4 +1,4 @@
-﻿namespace signa.templatecore.api
+﻿namespace Signa.TemplateCore.Api
 {
     public static class Globals
     {

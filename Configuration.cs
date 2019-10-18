@@ -2,7 +2,7 @@
 using Newtonsoft.Json.Linq;
 using System;
 
-namespace signa.templatecore.api.ConfigurationsHelper
+namespace Signa.TemplateCore.Api.ConfigurationsHelper
 {
     internal class DecimalConverter : JsonConverter
     {

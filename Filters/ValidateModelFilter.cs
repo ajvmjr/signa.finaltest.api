@@ -1,7 +1,7 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Filters;
 
-namespace signa.templatecore.api
+namespace Signa.TemplateCore.Api.Filters
 {
     public class ValidateModelFilter
     {
