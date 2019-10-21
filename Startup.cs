@@ -29,6 +29,7 @@ using Signa.TemplateCore.Api.Data.Repository;
 using Signa.Library.Extensions;
 using Signa.Library.Exceptions;
 using Signa.Library;
+using Microsoft.OpenApi.Models;
 
 namespace Signa.TemplateCore.Api
 {
@@ -45,54 +46,56 @@ namespace Signa.TemplateCore.Api
         // For more information on how to configure your application, visit https://go.microsoft.com/fwlink/?LinkID=398940
         public void ConfigureServices(IServiceCollection services)
         {
+            services.AddControllers();
+
             services.AddAutoMapper(new Action<IMapperConfigurationExpression>(c =>
             {
             }), typeof(Startup));
 
-            services.AddMvc(options =>
-                {
-                    options.Filters.Add(typeof(ValidateModelAttribute));
-                })
-                .AddNewtonsoftJson(options =>
-                {
-                    options.SerializerSettings.Formatting = Formatting.Indented;
-                    options.SerializerSettings.NullValueHandling = NullValueHandling.Ignore;
-                    options.SerializerSettings.DateFormatString = "dd/MM/yyyy HH:mm:ss";
-                    options.SerializerSettings.Converters = new List<JsonConverter> { new ConfigurationsHelper.DecimalConverter() };
-                }).AddFluentValidation();
+            // services.AddMvc(options =>
+            //     {
+            //         options.Filters.Add(typeof(ValidateModelAttribute));
+            //     })
+            //     .AddNewtonsoftJson(options =>
+            //     {
+            //         options.SerializerSettings.Formatting = Formatting.Indented;
+            //         options.SerializerSettings.NullValueHandling = NullValueHandling.Ignore;
+            //         options.SerializerSettings.DateFormatString = "dd/MM/yyyy HH:mm:ss";
+            //         options.SerializerSettings.Converters = new List<JsonConverter> { new ConfigurationsHelper.DecimalConverter() };
+            //     }).AddFluentValidation();
 
             #region :: Validators ::
             #endregion
 
             #region :: Swagger ::
             //Necessário para a documentação do Swagger
-            services.AddMvcCore().AddApiExplorer();
+            // services.AddMvcCore().AddApiExplorer();
 
-            services.AddResponseCompression();
+            // services.AddResponseCompression();
 
             services.AddSwaggerGen(options =>
             {
                 options.SwaggerDoc("v1",
-                    new Info
+                    new OpenApiInfo
                     {
                         Title = "Signa consultoria e Sistemas",
                         Version = "v1",
                         Description = "API Login Ecargo",
-                        Contact = new Contact
+                        Contact = new OpenApiContact
                         {
                             Name = "Signa",
-                            Url = "http://signainfo.com.br"
+                            Url = new Uri("http://signainfo.com.br")
                         }
                     });
 
                 options.AddSecurityDefinition(
                     "bearer",
-                    new ApiKeyScheme
+                    new OpenApiSecurityScheme
                     {
-                        In = "header",
+                        // In = "header",
                         Description = "Autenticação baseada em Json Web Token (JWT)",
                         Name = "Authorization",
-                        Type = "apiKey"
+                        // Type = "apiKey"
                     });
 
                 var applicationBasePath = PlatformServices.Default.Application.ApplicationBasePath;
@@ -103,14 +106,13 @@ namespace Signa.TemplateCore.Api
                 {
                     options.IncludeXmlComments(xmlDocumentPath);
                 }
-
-                options.OperationFilter<FormFileSwaggerFilter>();
             });
             #endregion
 
             #region :: Acesso a Dados / Dapper ::
             services.AddTransient<HelperDAO>();
             services.AddTransient<LogDatabaseDAO>();
+            services.AddTransient<DatabaseLog>();
             services.AddTransient<PessoaDAO>();
 
             DefaultTypeMap.MatchNamesWithUnderscores = true;
@@ -202,6 +204,24 @@ namespace Signa.TemplateCore.Api
                 loggingBuilder.AddConsole();
                 loggingBuilder.AddDebug();
             });
+
+            #region :: Middleware Claims from JWT ::
+            //https://www.wellingtonjhn.com/posts/obtendo-o-usu%C3%A1rio-logado-em-apis-asp.net-core/
+            // services.AddAuthorization();
+            // services.AddAuthorization(async delegate (HttpContext httpContext, Func<Task> next)
+            // {
+            //     if (httpContext.User.Claims.Any())
+            //     {
+            //         Globals.UserId = int.Parse(httpContext.User.Claims.Where(c => c.Type == "UserId").FirstOrDefault().Value);
+            //         Globals.UserGroupId = int.Parse(httpContext.User.Claims.Where(c => c.Type == "UserGroupId")?.FirstOrDefault().Value);
+            //     }
+
+            //     var connectionString = Configuration["DATABASE_CONNECTION"];
+            //     Global.ConnectionString = $"{connectionString} Api: {Global.NomeApi}:{Globals.UserId}";
+
+            //     await next.Invoke();
+            // });
+            #endregion
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -229,8 +249,14 @@ namespace Signa.TemplateCore.Api
             });
 
             app.UseHttpsRedirection();
-            app.UseResponseCompression();
-            app.UseAuthentication();
+            app.UseRouting();
+
+            app.UseCors(config =>
+            {
+                config.AllowAnyHeader();
+                config.AllowAnyMethod();
+                config.AllowAnyOrigin();
+            });
 
             app.UseMiddleware(typeof(ErrorHandlingMiddleware));
 
@@ -240,25 +266,23 @@ namespace Signa.TemplateCore.Api
             {
                 if (httpContext.User.Claims.Any())
                 {
-                    Globals.UserId = int.Parse(httpContext.User.Claims.Where(c => c.Type == "UserId").FirstOrDefault().Value);
-                    Globals.UserGroupId = int.Parse(httpContext.User.Claims.Where(c => c.Type == "UserGroupId")?.FirstOrDefault().Value);
+                    AuthenticatedUser.UserId = int.Parse(httpContext.User.Claims.Where(c => c.Type == "UserId").FirstOrDefault().Value);
+                    AuthenticatedUser.UserGroupId = int.Parse(httpContext.User.Claims.Where(c => c.Type == "UserGroupId")?.FirstOrDefault().Value);
                 }
-
-                var connectionString = Configuration["DATABASE_CONNECTION"];
-                Global.ConnectionString = $"{connectionString} Api: {Global.NomeApi}:{Globals.UserId}";
 
                 await next.Invoke();
             });
             #endregion
 
-            app.UseCors(config =>
-            {
-                config.AllowAnyHeader();
-                config.AllowAnyMethod();
-                config.AllowAnyOrigin();
-            });
+            app.UseAuthentication();
+            app.UseAuthorization();
 
-            app.UseMvc();
+            // app.UseResponseCompression();
+
+            app.UseEndpoints(endpoints =>
+            {
+                endpoints.MapControllers();
+            });
         }
     }
 }

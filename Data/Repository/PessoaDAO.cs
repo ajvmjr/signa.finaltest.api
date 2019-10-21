@@ -38,7 +38,7 @@ namespace Signa.TemplateCore.Api.Data.Repository
 
             using (var db = Connection)
             {
-                return db.QueryFirstOrDefault(sql, param);
+                return db.QueryFirstOrDefault<int>(sql, param);
 
                 // exemplo procedure
                 // return db.QueryFirstOrDefault("Sp_Ecr_Inc_Pessoa_Template", param, commandType: CommandType.StoredProcedure);
@@ -97,7 +97,7 @@ namespace Signa.TemplateCore.Api.Data.Repository
 
             using (var db = Connection)
             {
-                return db.QueryFirstOrDefault(sql, param);
+                return db.QueryFirstOrDefault<PessoaEntity>(sql, param);
             }
         }
 
@@ -117,7 +117,7 @@ namespace Signa.TemplateCore.Api.Data.Repository
 
             using (var db = Connection)
             {
-                return db.QueryFirstOrDefault(sql);
+                return db.Query<PessoaEntity>(sql);
             }
         }
 

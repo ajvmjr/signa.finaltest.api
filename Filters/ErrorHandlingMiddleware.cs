@@ -171,7 +171,7 @@ namespace Signa.TemplateCore.Api.Filters
 
                 _helperDAO.Gravar(new Domain.Entities.LogMsgEntity
                 {
-                    UsuarioInternetId = Globals.UserId,
+                    UsuarioInternetId = AuthenticatedUser.UserId,
                     DataLog = DateTime.Now,
                     Msg01 = result
                 });

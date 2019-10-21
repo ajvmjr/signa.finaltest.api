@@ -50,11 +50,11 @@ namespace Signa.TemplateCore.Api.Helpers
                     Msg03 = msg03,
                     Msg04 = msg04,
                     Msg05 = context.Request.Path,
-                    UsuarioInternetId = Globals.UserId,
+                    UsuarioInternetId = AuthenticatedUser.UserId,
                     DataLog = DateTime.Now
                 };
 
-                if (Globals.UserId == 1)
+                if (AuthenticatedUser.UserId == 1)
                 {
                     mensagemRetorno += log.Msg03 + " " + log.Msg02;
                 }
