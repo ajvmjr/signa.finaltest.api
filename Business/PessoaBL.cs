@@ -1,7 +1,7 @@
 using System.Collections.Generic;
-using Angis.Account.Api.Data.Repository;
 using AutoMapper;
 using Signa.Library.Extensions;
+using Signa.TemplateCore.Api.Data.Repository;
 using Signa.TemplateCore.Api.Domain.Entities;
 using Signa.TemplateCore.Api.Domain.Models;
 

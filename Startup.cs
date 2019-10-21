@@ -23,6 +23,9 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.Extensions.Logging;
 using System.Threading.Tasks;
 using System.Linq;
+using Signa.TemplateCore.Api.Domain.Entities;
+using Signa.TemplateCore.Api.Domain.Models;
+using Signa.TemplateCore.Api.Data.Repository;
 
 namespace Signa.TemplateCore.Api
 {
@@ -103,6 +106,10 @@ namespace Signa.TemplateCore.Api
             #endregion
 
             #region :: Acesso a Dados / Dapper ::
+            services.AddTransient<HelperDAO>();
+            services.AddTransient<LogDatabaseDAO>();
+            services.AddTransient<PessoaDAO>();
+
             DefaultTypeMap.MatchNamesWithUnderscores = true;
             #endregion
 
@@ -165,6 +172,9 @@ namespace Signa.TemplateCore.Api
             #region :: AutoMapper ::
             var config = new AutoMapper.MapperConfiguration(cfg =>
             {
+                cfg.CreateMap<PessoaEntity, PessoaModel>()
+                    .ForMember(d => d.CnpjCpf, s => s.MapFrom(x => x.IndicativoPfPj == "PF" ? x.PfCpf : x.PjCnpj))
+                    .ReverseMap();
             });
 
             IMapper mapper = config.CreateMapper();

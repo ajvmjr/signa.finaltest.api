@@ -1,11 +1,10 @@
 using System.Collections.Generic;
-using System.Data;
 using Dapper;
 using Microsoft.Extensions.Configuration;
 using Signa.TemplateCore.Api.Data.Repository;
 using Signa.TemplateCore.Api.Domain.Entities;
 
-namespace Angis.Account.Api.Data.Repository
+namespace Signa.TemplateCore.Api.Data.Repository
 {
     public class PessoaDAO : RepositoryBase
     {
