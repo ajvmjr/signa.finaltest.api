@@ -26,6 +26,9 @@ using System.Linq;
 using Signa.TemplateCore.Api.Domain.Entities;
 using Signa.TemplateCore.Api.Domain.Models;
 using Signa.TemplateCore.Api.Data.Repository;
+using Signa.Library.Extensions;
+using Signa.Library.Exceptions;
+using Signa.Library;
 
 namespace Signa.TemplateCore.Api
 {
@@ -118,6 +121,19 @@ namespace Signa.TemplateCore.Api
             services.Configure<AppSettings>(appSettingsSection);
 
             var appSettings = appSettingsSection.Get<AppSettings>();
+
+            if (appSettings.FunctionId.IsZeroOrNull())
+            {
+                throw new SignaRegraNegocioException("Necessário incluir o id da função");
+            }
+
+            if (appSettings.ApiName.IsNullEmptyOrWhiteSpace())
+            {
+                throw new SignaRegraNegocioException("Necessário incluir o nome da api");
+            }
+
+            Global.FuncaoId = appSettings.FunctionId;
+            Global.NomeApi = appSettings.ApiName;
             #endregion
 
             #region :: JWT / Token / Auth ::
@@ -227,6 +243,9 @@ namespace Signa.TemplateCore.Api
                     Globals.UserId = int.Parse(httpContext.User.Claims.Where(c => c.Type == "UserId").FirstOrDefault().Value);
                     Globals.UserGroupId = int.Parse(httpContext.User.Claims.Where(c => c.Type == "UserGroupId")?.FirstOrDefault().Value);
                 }
+
+                var connectionString = Configuration["DATABASE_CONNECTION"];
+                Global.ConnectionString = $"{connectionString} Api: {Global.NomeApi}:{Globals.UserId}";
 
                 await next.Invoke();
             });

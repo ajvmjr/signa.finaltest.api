@@ -4,5 +4,6 @@
     {
         public string Secret { get; set; }
         public int FunctionId { get; set; }
+        public string ApiName { get; set; }
     }
 }

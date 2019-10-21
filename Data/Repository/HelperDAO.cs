@@ -1,5 +1,6 @@
 ﻿using Dapper;
 using Microsoft.Extensions.Configuration;
+using Signa.Library;
 using Signa.TemplateCore.Api.Domain.Entities;
 using System;
 using System.Collections.Generic;
@@ -34,8 +35,9 @@ namespace Signa.TemplateCore.Api.Data.Repository
             using (IDbConnection db = Connection)
             {
                 db.Execute(
-                    sql: "Insert Log_Msg (Tab_Tipo_Msg_Id, Usuario_Internet_Id, Data_Log, Msg01, Msg02, Msg03, Msg04, Msg05)" + Environment.NewLine +
-                    "Values (@TabTipoMsgId, @UsuarioInternetId, @DataLog, @Msg01, @Msg02, @Msg03, @Msg04, @Msg05)",
+                    sql: $@"
+                        Insert Log_Msg (Tab_Tipo_Msg_Id, Usuario_Internet_Id, Data_Log, Msg01, Msg02, Msg03, Msg04, Msg05, Funcao_Id)
+                        Values (@TabTipoMsgId, @UsuarioInternetId, @DataLog, @Msg01, @Msg02, @Msg03, @Msg04, @Msg05, {Global.FuncaoId})",
                     param: log,
                     commandType: CommandType.Text
                     );
