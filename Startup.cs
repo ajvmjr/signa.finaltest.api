@@ -30,6 +30,7 @@ using Signa.Library.Extensions;
 using Signa.Library.Exceptions;
 using Signa.Library;
 using Microsoft.OpenApi.Models;
+using FluentValidation;
 
 namespace Signa.TemplateCore.Api
 {
@@ -46,11 +47,15 @@ namespace Signa.TemplateCore.Api
         // For more information on how to configure your application, visit https://go.microsoft.com/fwlink/?LinkID=398940
         public void ConfigureServices(IServiceCollection services)
         {
-            services.AddControllers();
+            services
+                .AddControllers()
+                .AddFluentValidation();
 
             services.AddAutoMapper(new Action<IMapperConfigurationExpression>(c =>
             {
             }), typeof(Startup));
+
+            // TODO: verificar formatação padrão do json - data e camelCase
 
             // services.AddMvc(options =>
             //     {
@@ -65,14 +70,10 @@ namespace Signa.TemplateCore.Api
             //     }).AddFluentValidation();
 
             #region :: Validators ::
+            services.AddTransient<IValidator<PessoaModel>, PessoaValidator>();
             #endregion
 
             #region :: Swagger ::
-            //Necessário para a documentação do Swagger
-            // services.AddMvcCore().AddApiExplorer();
-
-            // services.AddResponseCompression();
-
             services.AddSwaggerGen(options =>
             {
                 options.SwaggerDoc("v1",
@@ -204,24 +205,6 @@ namespace Signa.TemplateCore.Api
                 loggingBuilder.AddConsole();
                 loggingBuilder.AddDebug();
             });
-
-            #region :: Middleware Claims from JWT ::
-            //https://www.wellingtonjhn.com/posts/obtendo-o-usu%C3%A1rio-logado-em-apis-asp.net-core/
-            // services.AddAuthorization();
-            // services.AddAuthorization(async delegate (HttpContext httpContext, Func<Task> next)
-            // {
-            //     if (httpContext.User.Claims.Any())
-            //     {
-            //         Globals.UserId = int.Parse(httpContext.User.Claims.Where(c => c.Type == "UserId").FirstOrDefault().Value);
-            //         Globals.UserGroupId = int.Parse(httpContext.User.Claims.Where(c => c.Type == "UserGroupId")?.FirstOrDefault().Value);
-            //     }
-
-            //     var connectionString = Configuration["DATABASE_CONNECTION"];
-            //     Global.ConnectionString = $"{connectionString} Api: {Global.NomeApi}:{Globals.UserId}";
-
-            //     await next.Invoke();
-            // });
-            #endregion
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -262,6 +245,7 @@ namespace Signa.TemplateCore.Api
 
             #region :: Middleware Claims from JWT ::
             //https://www.wellingtonjhn.com/posts/obtendo-o-usu%C3%A1rio-logado-em-apis-asp.net-core/
+            // TODO: não está pegando o Claims do token, verificar - talvez criar middleware disso
             app.Use(async delegate (HttpContext httpContext, Func<Task> next)
             {
                 if (httpContext.User.Claims.Any())
@@ -270,6 +254,8 @@ namespace Signa.TemplateCore.Api
                     AuthenticatedUser.UserGroupId = int.Parse(httpContext.User.Claims.Where(c => c.Type == "UserGroupId")?.FirstOrDefault().Value);
                 }
 
+                // TODO: valorizar connection string, usuarioId e grupo de usuario a partir do headers - criar middleare disso
+
                 await next.Invoke();
             });
             #endregion
@@ -277,10 +263,13 @@ namespace Signa.TemplateCore.Api
             app.UseAuthentication();
             app.UseAuthorization();
 
+            // TODO: verificar para incluir compressão
             // app.UseResponseCompression();
 
             app.UseEndpoints(endpoints =>
             {
+                // TODO: verificar para abrir no swagger direto
+                // TODO: verificar endpoints para ter certeza que estão funcionando - testar no máximo de servidores que puder
                 endpoints.MapControllers();
             });
         }
