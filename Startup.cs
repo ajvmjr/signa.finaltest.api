@@ -55,20 +55,6 @@ namespace Signa.TemplateCore.Api
             {
             }), typeof(Startup));
 
-            // TODO: verificar formatação padrão do json - data e camelCase
-
-            // services.AddMvc(options =>
-            //     {
-            //         options.Filters.Add(typeof(ValidateModelAttribute));
-            //     })
-            //     .AddNewtonsoftJson(options =>
-            //     {
-            //         options.SerializerSettings.Formatting = Formatting.Indented;
-            //         options.SerializerSettings.NullValueHandling = NullValueHandling.Ignore;
-            //         options.SerializerSettings.DateFormatString = "dd/MM/yyyy HH:mm:ss";
-            //         options.SerializerSettings.Converters = new List<JsonConverter> { new ConfigurationsHelper.DecimalConverter() };
-            //     }).AddFluentValidation();
-
             #region :: Validators ::
             services.AddTransient<IValidator<PessoaModel>, PessoaValidator>();
             #endregion
@@ -193,6 +179,7 @@ namespace Signa.TemplateCore.Api
             {
                 cfg.CreateMap<PessoaEntity, PessoaModel>()
                     .ForMember(d => d.CnpjCpf, s => s.MapFrom(x => x.IndicativoPfPj == "PF" ? x.PfCpf : x.PjCnpj))
+                    .ForMember(d => d.DataNascimentoFormatada, s => s.MapFrom(x => x.DataNascimento.ToString("dd/MM/yyyy HH:mm")))
                     .ReverseMap();
             });
 

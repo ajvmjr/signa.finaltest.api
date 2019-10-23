@@ -1,7 +1,6 @@
 using System.Collections.Generic;
 using Dapper;
 using Microsoft.Extensions.Configuration;
-using Signa.TemplateCore.Api.Data.Repository;
 using Signa.TemplateCore.Api.Domain.Entities;
 
 namespace Signa.TemplateCore.Api.Data.Repository
@@ -23,8 +22,8 @@ namespace Signa.TemplateCore.Api.Data.Repository
                         Pessoa_Id = Pessoa_Id + 1,
                         @Id = Pessoa_Id + 1
 
-                    Insert Into Pessoa (Pessoa_Id, Nome, Nome_Fantasia, Pf_Cpf, Email, Tab_Status_Id)
-                    Values (@Id, @Nome, @NomeFantasia, @CnpjCpf, @Email, 1)
+                    Insert Into Pessoa (Pessoa_Id, Nome, Nome_Fantasia, Pf_Cpf, Email, Data_Nascimento, Tab_Status_Id)
+                    Values (@Id, @Nome, @NomeFantasia, @CnpjCpf, @Email, @Data_Nascimento, 1)
 
                     Select @Id";
 
@@ -53,7 +52,8 @@ namespace Signa.TemplateCore.Api.Data.Repository
                         Nome = @Nome,
                         Nome_Fantasia = @NomeFantasia,
                         PF_CPF = @CnpjCpf,
-                        Email = @Email
+                        Email = @Email,
+                        Data_Nascimento = @DataNascimento
                     Where Pessoa_Id = @Id";
 
             var param = new
@@ -62,7 +62,8 @@ namespace Signa.TemplateCore.Api.Data.Repository
                 pessoa.Nome,
                 pessoa.NomeFantasia,
                 cnpjCpf = pessoa.PjCnpj,
-                pessoa.Email
+                pessoa.Email,
+                pessoa.DataNascimento
             };
 
             using (var db = Connection)
@@ -84,7 +85,8 @@ namespace Signa.TemplateCore.Api.Data.Repository
                     Indicativo_Pf_Pj,
                     Pj_Cgc,
                     Pf_Cpf,
-                    Email
+                    Email,
+                    Data_Nascimento
                 From Pessoa
                 Where
                     Pessoa_Id = @Id
@@ -111,7 +113,8 @@ namespace Signa.TemplateCore.Api.Data.Repository
                     Indicativo_Pf_Pj,
                     Pj_Cgc,
                     Pf_Cpf,
-                    Email
+                    Email,
+                    Data_Nascimento
                 From Pessoa
                 Where Tab_Status_Id = 1";
 
