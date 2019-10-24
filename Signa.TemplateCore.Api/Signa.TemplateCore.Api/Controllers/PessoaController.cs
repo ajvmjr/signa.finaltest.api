@@ -44,6 +44,7 @@ namespace Signa.TemplateCore.Api.Controllers
         [ProducesResponseType(type: typeof(string), statusCode: 200)]
         public IActionResult DeletePessoa(int id)
         {
+            throw new Signa.Library.Exceptions.SignaSqlNotFoundException("teste");
             _pessoaBLL.Delete(id);
             return Ok("Pessoa excluída com sucesso");
         }

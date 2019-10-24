@@ -1,5 +1,4 @@
 ﻿using Microsoft.AspNetCore.Http;
-using Microsoft.Extensions.Configuration;
 using Newtonsoft.Json;
 using Signa.TemplateCore.Api.Data.Repository;
 using Signa.TemplateCore.Api.Helpers;
@@ -9,38 +8,34 @@ using System.Data.SqlClient;
 using System.Net;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
-using Serilog;
+using Microsoft.Extensions.Logging;
 
 namespace Signa.TemplateCore.Api.Data.Filters
 {
     public class ErrorHandlingMiddleware
     {
         private readonly RequestDelegate next;
-        // private readonly ILogger _logger;
+        private readonly ILogger<ErrorHandlingMiddleware> _logger;
+        private static IExceptionHandling _exceptionHandling;
         private readonly SignaRegraNegocioExceptionHandling _signaRegraNegocioHandling;
         private readonly SignaSqlNotFoundExceptionHandling _signaSqlNotFoundHandling;
         private readonly SqlExceptionHandling _sqlHandling;
         private readonly GenericExceptionHandling _genericHandling;
-        private static IExceptionHandling _exceptionHandling;
-
-        public IConfiguration Configuration { get; }
 
         public ErrorHandlingMiddleware(
             RequestDelegate next,
-            // ILogger logger,
+            ILogger<ErrorHandlingMiddleware> logger,
             SignaRegraNegocioExceptionHandling signaRegraNegocioHandling,
             SignaSqlNotFoundExceptionHandling signaSqlNotFoundHandling,
             SqlExceptionHandling sqlHandling,
-            GenericExceptionHandling genericHandling,
-            IConfiguration configuration)
+            GenericExceptionHandling genericHandling)
         {
             this.next = next;
-            this.Configuration = configuration;
             _signaRegraNegocioHandling = signaRegraNegocioHandling;
             _signaSqlNotFoundHandling = signaSqlNotFoundHandling;
             _sqlHandling = sqlHandling;
             _genericHandling = genericHandling;
-            // _logger = logger;
+            _logger = logger;
         }
 
         public async Task Invoke(HttpContext context)
@@ -110,8 +105,6 @@ namespace Signa.TemplateCore.Api.Data.Filters
         {
             public ErrorHandlingModel TratarErro(Exception ex)
             {
-                // TODO: estourar excessão em controller
-
                 var exception = ex as SignaSqlNotFoundException;
 
                 if (exception == null)
@@ -128,11 +121,15 @@ namespace Signa.TemplateCore.Api.Data.Filters
 
         public class SqlExceptionHandling : IExceptionHandling
         {
-            private DatabaseLog _databaseLog;
+            private readonly DatabaseLog _databaseLog;
+            private readonly ILogger<SqlExceptionHandling> _logger;
 
-            public SqlExceptionHandling(DatabaseLog databaseLog)
+            public SqlExceptionHandling(
+                DatabaseLog databaseLog,
+                ILogger<SqlExceptionHandling> logger)
             {
                 _databaseLog = databaseLog;
+                _logger = logger;
             }
 
             public ErrorHandlingModel TratarErro(Exception ex)
@@ -157,7 +154,7 @@ namespace Signa.TemplateCore.Api.Data.Filters
                     mensagemUsuario = "Problemas na nossa base de dados. Informe o suporte.";
                 }
 
-                // TODO: estourar excessão no console
+                _logger.LogError(ex, mensagemUsuario);
 
                 _databaseLog.GravaLogMsg(mensagemUsuario, ex);
 
@@ -170,11 +167,15 @@ namespace Signa.TemplateCore.Api.Data.Filters
 
         public class GenericExceptionHandling : IExceptionHandling
         {
-            private HelperDAO _helperDAO;
+            private readonly HelperDAO _helperDAO;
+            private readonly ILogger<GenericExceptionHandling> _logger;
 
-            public GenericExceptionHandling(HelperDAO helperDAO)
+            public GenericExceptionHandling(
+                HelperDAO helperDAO,
+                ILogger<GenericExceptionHandling> logger)
             {
                 _helperDAO = helperDAO;
+                _logger = logger;
             }
 
             public ErrorHandlingModel TratarErro(Exception ex)
@@ -187,7 +188,7 @@ namespace Signa.TemplateCore.Api.Data.Filters
                     Error = new { Text = ex.Message, Method = (frame.GetMethod().DeclaringType == null ? "" : frame.GetMethod().DeclaringType.Name) + "." + frame.GetMethod().Name, Linha = frame.GetFileLineNumber(), Coluna = frame.GetFileColumnNumber() }
                 });
 
-                // TODO: estourar erro em console
+                _logger.LogError(ex, ex.Message);
 
                 try
                 {
@@ -200,7 +201,7 @@ namespace Signa.TemplateCore.Api.Data.Filters
                 }
                 catch (Exception e)
                 {
-                    // TODO: estourar erro em console e em arquivo
+                    _logger.LogError(e, e.Message);
                 }
 
                 return new ErrorHandlingModel((int)HttpStatusCode.BadRequest, result);
@@ -241,7 +242,7 @@ namespace Signa.TemplateCore.Api.Data.Filters
             }
             catch (Exception ex)
             {
-                // TODO: incluir gravação no console e em arquivo
+                _logger.LogError(ex, ex.Message);
                 throw;
             }
         }

@@ -1,5 +1,5 @@
 ﻿using Microsoft.AspNetCore.Http;
-using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Logging;
 using Signa.TemplateCore.Api.Data.Entities;
 using Signa.TemplateCore.Api.Data.Repository;
 using System;
@@ -10,13 +10,15 @@ namespace Signa.TemplateCore.Api.Helpers
 {
     public class DatabaseLog
     {
-        private readonly IConfiguration configuration;
         private readonly HelperDAO helperDAO;
+        private readonly ILogger<DatabaseLog> _logger;
 
-        public DatabaseLog(IConfiguration configuration, HelperDAO helperDAO)
+        public DatabaseLog(
+            HelperDAO helperDAO,
+            ILogger<DatabaseLog> logger)
         {
-            this.configuration = configuration;
             this.helperDAO = helperDAO;
+            _logger = logger;
         }
 
         public string GravaLogMsg(string mensagemUsuario, Exception ex, HttpContext context = null)
@@ -61,9 +63,9 @@ namespace Signa.TemplateCore.Api.Helpers
 
                 helperDAO.Gravar(log);
             }
-            catch (Exception)
+            catch (Exception e)
             {
-                // TODO: estourar em console e em file
+                _logger.LogError(e, e.Message);
             }
 
             return mensagemRetorno;
