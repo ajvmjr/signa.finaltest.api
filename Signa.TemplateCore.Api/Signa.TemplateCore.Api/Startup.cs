@@ -59,7 +59,7 @@ namespace Signa.TemplateCore.Api
                 {
                     options.SerializerSettings.Formatting = Formatting.Indented;
                     options.SerializerSettings.NullValueHandling = NullValueHandling.Ignore;
-                    options.SerializerSettings.DateFormatString = "dd/MM/yyyy HH:mm:ss";
+                    // options.SerializerSettings.DateFormatString = "dd/MM/yyyy HH:mm:ss";
                     options.SerializerSettings.Converters = new List<JsonConverter> { new ConfigurationsHelper.DecimalConverter() };
                 }).AddFluentValidation();
 
@@ -207,6 +207,8 @@ namespace Signa.TemplateCore.Api
                 loggingBuilder.AddConsole();
                 loggingBuilder.AddDebug();
             });
+
+            Dapper.SqlMapper.AddTypeMap(typeof(string), System.Data.DbType.AnsiString);
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

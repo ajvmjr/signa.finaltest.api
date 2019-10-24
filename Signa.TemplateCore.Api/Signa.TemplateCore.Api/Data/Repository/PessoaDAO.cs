@@ -15,24 +15,25 @@ namespace Signa.TemplateCore.Api.Data.Repository
         public int Insert(PessoaEntity pessoa)
         {
             var sql = @"
-                    Declare @Id Int
+                    Declare @id Int
 
                     Update Infra_Ids
                     Set
                         Pessoa_Id = Pessoa_Id + 1,
-                        @Id = Pessoa_Id + 1
+                        @id = Pessoa_Id + 1
 
                     Insert Into Pessoa (Pessoa_Id, Nome, Nome_Fantasia, Pf_Cpf, Email, Data_Nascimento, Tab_Status_Id)
-                    Values (@Id, @Nome, @NomeFantasia, @CnpjCpf, @Email, @Data_Nascimento, 1)
+                    Values (@id, @nome, @nomeFantasia, @cnpjCpf, @email, @dataNascimento, 1)
 
-                    Select @Id";
+                    Select @id";
 
             var param = new
             {
-                pessoa.Nome,
-                pessoa.NomeFantasia,
-                CnpjCpf = pessoa.PjCnpj,
-                pessoa.Email
+                nome = new DbString { Value = pessoa.Nome, Length = 250, IsAnsi = true },
+                nomeFantasia = new DbString { Value = pessoa.NomeFantasia, Length = 250, IsAnsi = true },
+                cnpjCpf = new DbString { Value = pessoa.PjCnpj, Length = 19, IsAnsi = true },
+                email = new DbString { Value = pessoa.Email, Length = 100, IsAnsi = true },
+                dataNascimento = pessoa.DataNascimento
             };
 
             using (var db = Connection)
@@ -49,21 +50,21 @@ namespace Signa.TemplateCore.Api.Data.Repository
             var sql = @"
                     Update Pessoa
                     Set
-                        Nome = @Nome,
-                        Nome_Fantasia = @NomeFantasia,
-                        PF_CPF = @CnpjCpf,
-                        Email = @Email,
-                        Data_Nascimento = @DataNascimento
-                    Where Pessoa_Id = @Id";
+                        Nome = @nome,
+                        Nome_Fantasia = @nomeFantasia,
+                        PF_CPF = @cnpjCpf,
+                        Email = @email,
+                        Data_Nascimento = @dataNascimento
+                    Where Pessoa_Id = @id";
 
             var param = new
             {
-                pessoa.Id,
-                pessoa.Nome,
-                pessoa.NomeFantasia,
-                cnpjCpf = pessoa.PjCnpj,
-                pessoa.Email,
-                pessoa.DataNascimento
+                id = pessoa.Id,
+                nome = new DbString { Value = pessoa.Nome, Length = 250, IsAnsi = true },
+                nomeFantasia = new DbString { Value = pessoa.NomeFantasia, Length = 250, IsAnsi = true },
+                cnpjCpf = new DbString { Value = pessoa.PjCnpj, Length = 19, IsAnsi = true },
+                email = new DbString { Value = pessoa.Email, Length = 100, IsAnsi = true },
+                dataNascimento = pessoa.DataNascimento
             };
 
             using (var db = Connection)
@@ -89,12 +90,12 @@ namespace Signa.TemplateCore.Api.Data.Repository
                     Data_Nascimento
                 From Pessoa
                 Where
-                    Pessoa_Id = @Id
+                    Pessoa_Id = @id
                 And Tab_Status_Id = 1";
 
             var param = new
             {
-                Id = id
+                id
             };
 
             using (var db = Connection)
@@ -126,8 +127,8 @@ namespace Signa.TemplateCore.Api.Data.Repository
 
         public void Delete(int id)
         {
-            var sql = "Delete From Pessoa Where Pessoa_Id = @Id";
-            var param = new { Id = id };
+            var sql = "Delete From Pessoa Where Pessoa_Id = @id";
+            var param = new { id };
 
             using (var db = Connection)
             {
