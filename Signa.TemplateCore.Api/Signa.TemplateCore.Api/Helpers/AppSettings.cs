@@ -3,7 +3,7 @@
     public class AppSettings
     {
         public string Secret { get; set; }
-        public int FunctionId { get; set; }
-        public string ApiName { get; set; }
+        public int FuncaoId { get; set; }
+        public string NomeApi { get; set; }
     }
 }

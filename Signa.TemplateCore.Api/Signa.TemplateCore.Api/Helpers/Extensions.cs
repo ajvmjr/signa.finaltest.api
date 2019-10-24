@@ -1,9 +1,14 @@
-using System;
+﻿using System;
 
 namespace Signa.TemplateCore.Api.Helpers
 {
     public static class Extensions
     {
+        public static bool IsNumeric(this string s)
+        {
+            return double.TryParse(s, out double output);
+        }
+
         public static string[] SplitBy(this string text, int maxLenght, int count)
         {
             var @return = new string[count];

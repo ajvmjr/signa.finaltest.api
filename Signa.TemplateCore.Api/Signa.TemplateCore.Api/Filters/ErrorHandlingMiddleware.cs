@@ -1,16 +1,16 @@
+﻿using Microsoft.AspNetCore.Http;
+using Microsoft.Extensions.Configuration;
+using Newtonsoft.Json;
+using Signa.TemplateCore.Api.Data.Repository;
+using Signa.TemplateCore.Api.Helpers;
+using Signa.Library.Exceptions;
 using System;
 using System.Data.SqlClient;
 using System.Net;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
-using Microsoft.AspNetCore.Http;
-using Microsoft.Extensions.Configuration;
-using Newtonsoft.Json;
-using Signa.Library.Exceptions;
-using Signa.TemplateCore.Api.Data.Repository;
-using Signa.TemplateCore.Api.Helpers;
 
-namespace Signa.TemplateCore.Api.Filters
+namespace Signa.TemplateCore.Api.Data.Filters
 {
     public class ErrorHandlingMiddleware
     {
@@ -169,9 +169,9 @@ namespace Signa.TemplateCore.Api.Filters
                     Error = new { Text = ex.Message, Method = (frame.GetMethod().DeclaringType == null ? "" : frame.GetMethod().DeclaringType.Name) + "." + frame.GetMethod().Name, Linha = frame.GetFileLineNumber(), Coluna = frame.GetFileColumnNumber() }
                 });
 
-                _helperDAO.Gravar(new Domain.Entities.LogMsgEntity
+                _helperDAO.Gravar(new Data.Entities.LogMsg
                 {
-                    UsuarioInternetId = AuthenticatedUser.UserId,
+                    UsuarioInternetId = Globals.UsuarioId,
                     DataLog = DateTime.Now,
                     Msg01 = result
                 });

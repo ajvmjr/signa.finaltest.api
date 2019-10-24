@@ -1,9 +1,9 @@
-using System;
+﻿using System;
 using System.Xml;
 
-namespace Signa.TemplateCore.Api.Domain.Entities
+namespace Signa.TemplateCore.Api.Data.Entities
 {
-    public class LogExecucaoEntity
+    public class LogExecucao
     {
         public DateTime DataExecucao { get; set; }
         public int? FuncaoId { get; set; }

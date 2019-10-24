@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Http.Internal;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
@@ -10,7 +11,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Xml;
 
-namespace Signa.TemplateCore.Api.Filters
+namespace Signa.TemplateCore.Api.Data.Filters
 {
     public class RequestResponseLoggingMiddleware
     {
@@ -52,7 +53,7 @@ namespace Signa.TemplateCore.Api.Filters
                 {
                     var xmlOut = await FormatResponse(context.Response);
 
-                    _logDatabase.Insert(new Domain.Entities.LogExecucaoEntity
+                    _logDatabase.Insert(new Data.Entities.LogExecucao
                     {
                         DataExecucao = DateTime.Now,
                         FuncaoId = 80966,
@@ -68,7 +69,7 @@ namespace Signa.TemplateCore.Api.Filters
         private async Task<string> FormatRequest(HttpRequest request)
         {
             var body = request.Body;
-            request.EnableBuffering();
+            request.EnableRewind();
 
             var buffer = new byte[Convert.ToInt32(request.ContentLength)];
             await request.Body.ReadAsync(buffer, 0, buffer.Length);

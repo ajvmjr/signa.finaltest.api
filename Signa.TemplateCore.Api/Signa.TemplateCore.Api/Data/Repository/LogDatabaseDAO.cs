@@ -1,7 +1,7 @@
 ﻿using Dapper;
 using Microsoft.Extensions.Configuration;
+using Signa.TemplateCore.Api.Data.Entities;
 using System.Data;
-using Signa.TemplateCore.Api.Domain.Entities;
 
 namespace Signa.TemplateCore.Api.Data.Repository
 {
@@ -12,7 +12,7 @@ namespace Signa.TemplateCore.Api.Data.Repository
             base.configuration = configuration;
         }
 
-        public void Insert(LogExecucaoEntity log)
+        public void Insert(LogExecucao log)
         {
             using (IDbConnection db = Connection)
             {

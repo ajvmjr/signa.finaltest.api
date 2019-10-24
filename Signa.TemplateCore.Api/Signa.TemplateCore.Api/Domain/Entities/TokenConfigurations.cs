@@ -3,7 +3,7 @@ using System;
 using System.Security.Cryptography;
 using System.Text;
 
-namespace Signa.TemplateCore.Api.Security
+namespace Signa.TemplateCore.Api.Domain.Entities
 {
     public class TokenConfigurations
     {

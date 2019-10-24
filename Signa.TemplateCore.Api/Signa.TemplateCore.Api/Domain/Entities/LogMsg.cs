@@ -1,9 +1,9 @@
+﻿using Signa.TemplateCore.Api.Helpers;
 using System;
-using Signa.TemplateCore.Api.Helpers;
 
-namespace Signa.TemplateCore.Api.Domain.Entities
+namespace Signa.TemplateCore.Api.Data.Entities
 {
-    public class LogMsgEntity
+    public class LogMsg
     {
         private string _msg01;
 

@@ -7,7 +7,7 @@ namespace Signa.TemplateCore.Api.Data.Repository
     public abstract class RepositoryBase
     {
         protected const string _n = "\n";
-        protected int _usuarioId = AuthenticatedUser.UserId.GetValueOrDefault();
+        protected int _usuarioId = Globals.UsuarioId.GetValueOrDefault();
         protected IConfiguration configuration;
 
         internal IDbConnection Connection

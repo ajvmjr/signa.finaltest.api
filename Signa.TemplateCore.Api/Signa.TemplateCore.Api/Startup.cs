@@ -1,33 +1,37 @@
-using System;
-using AutoMapper;
+﻿using AutoMapper;
+using Dapper;
+using FluentValidation;
+using FluentValidation.AspNetCore;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Hosting;
-using FluentValidation.AspNetCore;
-using System.IO;
-using Microsoft.Extensions.PlatformAbstractions;
-using Signa.TemplateCore.Api.Filters;
-using Dapper;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
-using Signa.TemplateCore.Api.Helpers;
-using Signa.TemplateCore.Api.Security;
-using Microsoft.Extensions.Options;
-using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.AspNetCore.Authorization;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
-using System.Threading.Tasks;
-using System.Linq;
-using Signa.TemplateCore.Api.Domain.Entities;
-using Signa.TemplateCore.Api.Domain.Models;
+using Microsoft.Extensions.Options;
+using Microsoft.Extensions.PlatformAbstractions;
+using Newtonsoft.Json;
+using Signa.TemplateCore.Api.Data.Filters;
 using Signa.TemplateCore.Api.Data.Repository;
+using Signa.TemplateCore.Api.Filters;
+using Signa.TemplateCore.Api.Helpers;
+using Swashbuckle.AspNetCore.Swagger;
+using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
+using System.Threading.Tasks;
+using static Signa.TemplateCore.Api.Filters.ValidateModel;
+using Signa.TemplateCore.Api.Domain.Models;
+using Signa.TemplateCore.Api.Domain.Entities;
 using Signa.Library.Extensions;
 using Signa.Library.Exceptions;
 using Signa.Library;
-using Microsoft.OpenApi.Models;
-using FluentValidation;
 
+[assembly: ApiConventionType(typeof(DefaultApiConventions))]
 namespace Signa.TemplateCore.Api
 {
     public class Startup
@@ -40,45 +44,58 @@ namespace Signa.TemplateCore.Api
         public IConfiguration Configuration { get; }
 
         // This method gets called by the runtime. Use this method to add services to the container.
-        // For more information on how to configure your application, visit https://go.microsoft.com/fwlink/?LinkID=398940
         public void ConfigureServices(IServiceCollection services)
         {
-            services
-                .AddControllers()
-                .AddFluentValidation();
-
             services.AddAutoMapper(new Action<IMapperConfigurationExpression>(c =>
             {
             }), typeof(Startup));
+
+            services.AddMvc(options =>
+                {
+                    options.Filters.Add(typeof(ValidateModelAttribute));
+                })
+                .SetCompatibilityVersion(CompatibilityVersion.Version_2_2)
+                .AddJsonOptions(options =>
+                {
+                    options.SerializerSettings.Formatting = Formatting.Indented;
+                    options.SerializerSettings.NullValueHandling = NullValueHandling.Ignore;
+                    options.SerializerSettings.DateFormatString = "dd/MM/yyyy HH:mm:ss";
+                    options.SerializerSettings.Converters = new List<JsonConverter> { new ConfigurationsHelper.DecimalConverter() };
+                }).AddFluentValidation();
 
             #region :: Validators ::
             services.AddTransient<IValidator<PessoaModel>, PessoaValidator>();
             #endregion
 
             #region :: Swagger ::
+            //Necessário para a documentação do Swagger
+            services.AddMvcCore().AddApiExplorer();
+
+            services.AddResponseCompression();
+
             services.AddSwaggerGen(options =>
             {
                 options.SwaggerDoc("v1",
-                    new OpenApiInfo
+                    new Info
                     {
                         Title = "Signa consultoria e Sistemas",
                         Version = "v1",
-                        Description = "API Login Ecargo",
-                        Contact = new OpenApiContact
+                        Description = "API Template Signa",
+                        Contact = new Contact
                         {
                             Name = "Signa",
-                            Url = new Uri("http://signainfo.com.br")
+                            Url = "http://signainfo.com.br"
                         }
                     });
 
                 options.AddSecurityDefinition(
                     "bearer",
-                    new OpenApiSecurityScheme
+                    new ApiKeyScheme
                     {
-                        // In = "header",
+                        In = "header",
                         Description = "Autenticação baseada em Json Web Token (JWT)",
                         Name = "Authorization",
-                        // Type = "apiKey"
+                        Type = "apiKey"
                     });
 
                 var applicationBasePath = PlatformServices.Default.Application.ApplicationBasePath;
@@ -89,13 +106,15 @@ namespace Signa.TemplateCore.Api
                 {
                     options.IncludeXmlComments(xmlDocumentPath);
                 }
+
+                options.OperationFilter<FormFileSwaggerFilter>();
             });
             #endregion
 
             #region :: Acesso a Dados / Dapper ::
             services.AddTransient<HelperDAO>();
-            services.AddTransient<LogDatabaseDAO>();
             services.AddTransient<DatabaseLog>();
+            services.AddTransient<LogDatabaseDAO>();
             services.AddTransient<PessoaDAO>();
 
             DefaultTypeMap.MatchNamesWithUnderscores = true;
@@ -107,18 +126,18 @@ namespace Signa.TemplateCore.Api
 
             var appSettings = appSettingsSection.Get<AppSettings>();
 
-            if (appSettings.FunctionId.IsZeroOrNull())
+            if (appSettings.FuncaoId.IsZeroOrNull())
             {
                 throw new SignaRegraNegocioException("Necessário incluir o id da função");
             }
 
-            if (appSettings.ApiName.IsNullEmptyOrWhiteSpace())
+            if (appSettings.NomeApi.IsNullEmptyOrWhiteSpace())
             {
                 throw new SignaRegraNegocioException("Necessário incluir o nome da api");
             }
 
-            Global.FuncaoId = appSettings.FunctionId;
-            Global.NomeApi = appSettings.ApiName;
+            Global.FuncaoId = appSettings.FuncaoId;
+            Global.NomeApi = appSettings.NomeApi;
             #endregion
 
             #region :: JWT / Token / Auth ::
@@ -191,8 +210,9 @@ namespace Signa.TemplateCore.Api
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
-        public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
+        public void Configure(IApplicationBuilder app, IHostingEnvironment env, ILoggerFactory loggerFactory)
         {
+
             if (env.IsDevelopment())
             {
                 app.UseDeveloperExceptionPage();
@@ -215,7 +235,24 @@ namespace Signa.TemplateCore.Api
             });
 
             app.UseHttpsRedirection();
-            app.UseRouting();
+            app.UseResponseCompression();
+            app.UseAuthentication();
+
+            #region :: Middleware Claims from JWT ::
+            //https://www.wellingtonjhn.com/posts/obtendo-o-usu%C3%A1rio-logado-em-apis-asp.net-core/
+            app.Use(async delegate (HttpContext httpContext, Func<Task> next)
+            {
+                if (httpContext.User.Claims.Any())
+                {
+                    Globals.UsuarioId = int.Parse(httpContext.User.Claims.Where(c => c.Type == "UserId").FirstOrDefault().Value);
+                    Globals.GrupoUsuarioId = int.Parse(httpContext.User.Claims.Where(c => c.Type == "UserGroupId")?.FirstOrDefault().Value);
+                }
+
+                await next.Invoke();
+            });
+            #endregion
+
+            app.UseMiddleware(typeof(ErrorHandlingMiddleware));
 
             app.UseCors(config =>
             {
@@ -224,37 +261,7 @@ namespace Signa.TemplateCore.Api
                 config.AllowAnyOrigin();
             });
 
-            app.UseMiddleware(typeof(ErrorHandlingMiddleware));
-
-            #region :: Middleware Claims from JWT ::
-            //https://www.wellingtonjhn.com/posts/obtendo-o-usu%C3%A1rio-logado-em-apis-asp.net-core/
-            // TODO: não está pegando o Claims do token, verificar - talvez criar middleware disso
-            app.Use(async delegate (HttpContext httpContext, Func<Task> next)
-            {
-                if (httpContext.User.Claims.Any())
-                {
-                    AuthenticatedUser.UserId = int.Parse(httpContext.User.Claims.Where(c => c.Type == "UserId").FirstOrDefault().Value);
-                    AuthenticatedUser.UserGroupId = int.Parse(httpContext.User.Claims.Where(c => c.Type == "UserGroupId")?.FirstOrDefault().Value);
-                }
-
-                // TODO: valorizar connection string, usuarioId e grupo de usuario a partir do headers - criar middleare disso
-
-                await next.Invoke();
-            });
-            #endregion
-
-            app.UseAuthentication();
-            app.UseAuthorization();
-
-            // TODO: verificar para incluir compressão
-            // app.UseResponseCompression();
-
-            app.UseEndpoints(endpoints =>
-            {
-                // TODO: verificar para abrir no swagger direto
-                // TODO: verificar endpoints para ter certeza que estão funcionando - testar no máximo de servidores que puder
-                endpoints.MapControllers();
-            });
+            app.UseMvc();
         }
     }
 }

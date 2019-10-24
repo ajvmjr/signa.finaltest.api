@@ -1,7 +1,7 @@
 ﻿using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Configuration;
+using Signa.TemplateCore.Api.Data.Entities;
 using Signa.TemplateCore.Api.Data.Repository;
-using Signa.TemplateCore.Api.Domain.Entities;
 using System;
 using System.Diagnostics;
 using System.Linq;
@@ -42,7 +42,7 @@ namespace Signa.TemplateCore.Api.Helpers
                     msg04 = ex.StackTrace;
                 }
 
-                var log = new LogMsgEntity
+                var log = new LogMsg
                 {
                     TabTipoMsgId = 95,
                     Msg01 = mensagemUsuario,
@@ -50,11 +50,11 @@ namespace Signa.TemplateCore.Api.Helpers
                     Msg03 = msg03,
                     Msg04 = msg04,
                     Msg05 = context.Request.Path,
-                    UsuarioInternetId = AuthenticatedUser.UserId,
+                    UsuarioInternetId = Globals.UsuarioId,
                     DataLog = DateTime.Now
                 };
 
-                if (AuthenticatedUser.UserId == 1)
+                if (Globals.UsuarioId == 1)
                 {
                     mensagemRetorno += log.Msg03 + " " + log.Msg02;
                 }
