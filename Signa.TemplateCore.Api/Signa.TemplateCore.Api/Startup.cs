@@ -30,6 +30,8 @@ using Signa.TemplateCore.Api.Domain.Entities;
 using Signa.Library.Extensions;
 using Signa.Library.Exceptions;
 using Signa.Library;
+using static Signa.TemplateCore.Api.Data.Filters.ErrorHandlingMiddleware;
+using Serilog;
 
 [assembly: ApiConventionType(typeof(DefaultApiConventions))]
 namespace Signa.TemplateCore.Api
@@ -202,13 +204,19 @@ namespace Signa.TemplateCore.Api
             services.AddSingleton(mapper);
             #endregion
 
-            services.AddLogging(loggingBuilder =>
-            {
-                loggingBuilder.AddConsole();
-                loggingBuilder.AddDebug();
-            });
+            // services.AddLogging(loggingBuilder =>
+            // {
+            //     loggingBuilder.AddConsole();
+            //     loggingBuilder.AddDebug();
+            // });
 
             Dapper.SqlMapper.AddTypeMap(typeof(string), System.Data.DbType.AnsiString);
+
+            services.AddTransient<SignaRegraNegocioExceptionHandling>();
+            services.AddTransient<SignaSqlNotFoundExceptionHandling>();
+            services.AddTransient<SqlExceptionHandling>();
+            services.AddTransient<GenericExceptionHandling>();
+            // services.AddTransient<HttpContext>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -240,6 +248,10 @@ namespace Signa.TemplateCore.Api
             app.UseResponseCompression();
             app.UseAuthentication();
 
+            loggerFactory.AddSerilog();
+            
+            app.UseMiddleware(typeof(ErrorHandlingMiddleware));
+
             #region :: Middleware Claims from JWT ::
             //https://www.wellingtonjhn.com/posts/obtendo-o-usu%C3%A1rio-logado-em-apis-asp.net-core/
             app.Use(async delegate (HttpContext httpContext, Func<Task> next)
@@ -253,8 +265,6 @@ namespace Signa.TemplateCore.Api
                 await next.Invoke();
             });
             #endregion
-
-            app.UseMiddleware(typeof(ErrorHandlingMiddleware));
 
             app.UseCors(config =>
             {

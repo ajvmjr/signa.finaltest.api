@@ -63,6 +63,7 @@ namespace Signa.TemplateCore.Api.Helpers
             }
             catch (Exception)
             {
+                // TODO: estourar em console e em file
             }
 
             return mensagemRetorno;
