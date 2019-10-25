@@ -31,7 +31,7 @@ using static Signa.TemplateCore.Api.Data.Filters.ErrorHandlingMiddleware;
 using Serilog;
 using Signa.Library.Core.Extensions;
 using Signa.Library.Core.Exceptions;
-using Signa.Library;
+using Signa.Library.Core;
 
 [assembly: ApiConventionType(typeof(DefaultApiConventions))]
 namespace Signa.TemplateCore.Api
@@ -61,7 +61,6 @@ namespace Signa.TemplateCore.Api
                 {
                     options.SerializerSettings.Formatting = Formatting.Indented;
                     options.SerializerSettings.NullValueHandling = NullValueHandling.Ignore;
-                    // options.SerializerSettings.DateFormatString = "dd/MM/yyyy HH:mm:ss";
                     options.SerializerSettings.Converters = new List<JsonConverter> { new ConfigurationsHelper.DecimalConverter() };
                 }).AddFluentValidation();
 
