@@ -1,6 +1,6 @@
 using System.Collections.Generic;
 using AutoMapper;
-using Signa.Library.Extensions;
+using Signa.Library.Core.Extensions;
 using Signa.TemplateCore.Api.Data.Repository;
 using Signa.TemplateCore.Api.Domain.Entities;
 using Signa.TemplateCore.Api.Domain.Models;
@@ -23,7 +23,7 @@ namespace Signa.TemplateCore.Api.Business
 
         public PessoaModel Insert(PessoaModel pessoa)
         {
-            int id;
+            int id = 0;
             var entidade = _mapper.Map<PessoaEntity>(pessoa);
 
             if (pessoa.Id.IsZeroOrNull())

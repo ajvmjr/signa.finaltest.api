@@ -27,11 +27,11 @@ using System.Threading.Tasks;
 using static Signa.TemplateCore.Api.Filters.ValidateModel;
 using Signa.TemplateCore.Api.Domain.Models;
 using Signa.TemplateCore.Api.Domain.Entities;
-using Signa.Library.Extensions;
-using Signa.Library.Exceptions;
-using Signa.Library;
 using static Signa.TemplateCore.Api.Data.Filters.ErrorHandlingMiddleware;
 using Serilog;
+using Signa.Library.Core.Extensions;
+using Signa.Library.Core.Exceptions;
+using Signa.Library;
 
 [assembly: ApiConventionType(typeof(DefaultApiConventions))]
 namespace Signa.TemplateCore.Api
@@ -139,7 +139,7 @@ namespace Signa.TemplateCore.Api
             }
 
             Global.FuncaoId = appSettings.FuncaoId;
-            Global.NomeApi = appSettings.NomeApi;
+            Global.NomeProjeto = appSettings.NomeApi;
             #endregion
 
             #region :: JWT / Token / Auth ::
@@ -204,19 +204,12 @@ namespace Signa.TemplateCore.Api
             services.AddSingleton(mapper);
             #endregion
 
-            // services.AddLogging(loggingBuilder =>
-            // {
-            //     loggingBuilder.AddConsole();
-            //     loggingBuilder.AddDebug();
-            // });
-
             Dapper.SqlMapper.AddTypeMap(typeof(string), System.Data.DbType.AnsiString);
 
             services.AddTransient<SignaRegraNegocioExceptionHandling>();
             services.AddTransient<SignaSqlNotFoundExceptionHandling>();
             services.AddTransient<SqlExceptionHandling>();
             services.AddTransient<GenericExceptionHandling>();
-            // services.AddTransient<HttpContext>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -249,7 +242,7 @@ namespace Signa.TemplateCore.Api
             app.UseAuthentication();
 
             loggerFactory.AddSerilog();
-            
+
             app.UseMiddleware(typeof(ErrorHandlingMiddleware));
 
             #region :: Middleware Claims from JWT ::

@@ -2,7 +2,7 @@
 using Newtonsoft.Json;
 using Signa.TemplateCore.Api.Data.Repository;
 using Signa.TemplateCore.Api.Helpers;
-using Signa.Library.Exceptions;
+using Signa.Library.Core.Exceptions;
 using System;
 using System.Data.SqlClient;
 using System.Net;
