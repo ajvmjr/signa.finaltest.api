@@ -1,9 +1,7 @@
 using System.Collections.Generic;
-using AutoMapper;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Signa.TemplateCore.Api.Business;
-using Signa.TemplateCore.Api.Data.Repository;
 using Signa.TemplateCore.Api.Domain.Models;
 
 namespace Signa.TemplateCore.Api.Controllers
@@ -16,13 +14,9 @@ namespace Signa.TemplateCore.Api.Controllers
     {
         private readonly PessoaBL _pessoaBLL;
 
-        public PessoaController(
-            IMapper mapper,
-            PessoaDAO pessoaDAO
-        )
+        public PessoaController(PessoaBL pessoaBLL)
         {
-            // TODO: BL por DI, assim não é necessário passar mapper e dao no controller
-            _pessoaBLL = new PessoaBL(mapper, pessoaDAO);
+            _pessoaBLL = pessoaBLL;
         }
 
         [HttpPost]
