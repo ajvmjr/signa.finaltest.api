@@ -21,6 +21,7 @@ namespace Signa.TemplateCore.Api.Controllers
             PessoaDAO pessoaDAO
         )
         {
+            // TODO: BL por DI, assim não é necessário passar mapper e dao no controller
             _pessoaBLL = new PessoaBL(mapper, pessoaDAO);
         }
 
