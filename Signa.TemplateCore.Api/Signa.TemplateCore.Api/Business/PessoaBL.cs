@@ -1,4 +1,5 @@
 using AutoMapper;
+using Signa.Library.Core.Exceptions;
 using Signa.Library.Core.Extensions;
 using Signa.TemplateCore.Api.Data.Repository;
 using Signa.TemplateCore.Api.Domain.Entities;
@@ -36,10 +37,20 @@ namespace Signa.TemplateCore.Api.Business
                 _pessoaDAO.Update(entidade);
             }
 
-            return _mapper.Map<PessoaModel>(GetById(id));
+            return GetById(id);
         }
 
-        public PessoaModel GetById(int id) => _mapper.Map<PessoaModel>(_pessoaDAO.GetById(id));
+        public PessoaModel GetById(int id)
+        {
+            var pessoa = _mapper.Map<PessoaModel>(_pessoaDAO.GetById(id));
+
+            if (pessoa == null)
+            {
+                throw new SignaSqlNotFoundException("Nenhuma pessoa encontrada com esse id");
+            }
+
+            return pessoa;
+        }
 
         public IEnumerable<PessoaModel> Get() => _mapper.Map<IEnumerable<PessoaModel>>(_pessoaDAO.Get());
 
