@@ -127,7 +127,7 @@ namespace Signa.TemplateCore.Api.Data.Repository
 
         public void Delete(int id)
         {
-            var sql = "Update Pessoa Set Tab_Status_Id = 2 Where Id = @id";
+            var sql = "Update Pessoa Set Tab_Status_Id = 2 Where Pessoa_Id = @id";
             var param = new { id };
 
             using (var db = Connection)
