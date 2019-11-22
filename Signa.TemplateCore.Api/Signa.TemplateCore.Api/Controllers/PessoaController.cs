@@ -36,11 +36,14 @@ namespace Signa.TemplateCore.Api.Controllers
 
         [HttpDelete]
         [Route("pessoa/{id}")]
-        [ProducesResponseType(type: typeof(string), statusCode: 200)]
+        [ProducesResponseType(type: typeof(object), statusCode: 200)]
         public IActionResult DeletePessoa(int id)
         {
             _pessoaBLL.Delete(id);
-            return Ok("Pessoa excluída com sucesso");
+            return Ok(new
+            {
+                Message = "Pessoa excluída com sucesso"
+            });
         }
     }
 }
