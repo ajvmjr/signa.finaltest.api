@@ -52,7 +52,17 @@ namespace Signa.TemplateCore.Api.Business
             return pessoa;
         }
 
-        public IEnumerable<PessoaModel> Get() => _mapper.Map<IEnumerable<PessoaModel>>(_pessoaDAO.Get());
+        public IEnumerable<PessoaModel> Get()
+        {
+            var results = _mapper.Map<IEnumerable<PessoaModel>>(_pessoaDAO.Get());
+
+            if (results.IsNullOrEmpty())
+            {
+                throw new SignaSqlNotFoundException("Nenhuma pessoa encontrada");
+            }
+
+            return results;
+        }
 
         public void Delete(int id)
         {

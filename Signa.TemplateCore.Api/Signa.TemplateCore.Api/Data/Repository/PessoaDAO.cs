@@ -19,8 +19,8 @@ namespace Signa.TemplateCore.Api.Data.Repository
 
                     Update Infra_Ids
                     Set
-                        Pessoa_Id = Pessoa_Id + 1,
-                        @id = Pessoa_Id + 1
+                        @id = Pessoa_Id + 1,
+                        Pessoa_Id = Pessoa_Id + 1
 
                     Insert Into Pessoa (Pessoa_Id, Nome, Nome_Fantasia, Pf_Cpf, Email, Data_Nascimento, Tab_Status_Id)
                     Values (@id, @nome, @nomeFantasia, @cnpjCpf, @email, @dataNascimento, 1)
@@ -127,7 +127,7 @@ namespace Signa.TemplateCore.Api.Data.Repository
 
         public void Delete(int id)
         {
-            var sql = "Delete From Pessoa Where Pessoa_Id = @id";
+            var sql = "Update Pessoa Set Tab_Status_Id = 2 Where Id = @id";
             var param = new { id };
 
             using (var db = Connection)
