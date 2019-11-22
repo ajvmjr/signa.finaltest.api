@@ -3,10 +3,11 @@
   <PropertyGroup>
     <TargetFramework>netcoreapp2.2</TargetFramework>
     <Company>Signa Consultoria e Sistemas</Company>
-    <Product>Api.Login</Product>
-    <Authors>Api.Login</Authors>
+    <Product>Ecargo</Product>
+    <Authors>Signa</Authors>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
     <LangVersion>7.2</LangVersion>
+    <GeneratePackageOnBuild>false</GeneratePackageOnBuild>
   </PropertyGroup>
 
   <Target Name="PrepublishScript" BeforeTargets="PrepareForPublish">
@@ -21,10 +22,11 @@
     <SccProvider></SccProvider>
     <SccAuxPath></SccAuxPath>
     <SccLocalPath></SccLocalPath>
+    <Version>1.1.0</Version>
   </PropertyGroup>
   
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
-    <DocumentationFile>bin\Debug\netcoreapp2.1\Angin.Account.Api.xml</DocumentationFile>
+    <DocumentationFile>bin\Debug\netcoreapp2.1\Signa.TemplateCore.Api.xml</DocumentationFile>
     <TreatWarningsAsErrors>false</TreatWarningsAsErrors>
     <WarningsAsErrors>NU1605</WarningsAsErrors>
     <NoWarn>1701;1702;1591;1573</NoWarn>
@@ -53,7 +55,7 @@
     <PackageReference Include="Serilog.AspNetCore" Version="3.1.0" />
     <PackageReference Include="Serilog.Sinks.Console" Version="3.1.1" />
     <PackageReference Include="Serilog.Sinks.File" Version="4.1.0" />
-    <PackageReference Include="Signa.Library.Core" Version="1.0.1" />
+    <PackageReference Include="Signa.Library.Core" Version="2.0.0" />
     <PackageReference Include="Swashbuckle.AspNetCore" Version="4.0.1" />
   </ItemGroup>
 

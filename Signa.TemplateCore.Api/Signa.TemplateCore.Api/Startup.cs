@@ -32,6 +32,8 @@ using Serilog;
 using Signa.Library.Core.Extensions;
 using Signa.Library.Core.Exceptions;
 using Signa.Library.Core;
+using Signa.TemplateCore.Api.Business;
+using Signa.Library.Core.Helpers;
 
 [assembly: ApiConventionType(typeof(DefaultApiConventions))]
 namespace Signa.TemplateCore.Api
@@ -119,6 +121,24 @@ namespace Signa.TemplateCore.Api
             services.AddTransient<PessoaDAO>();
 
             DefaultTypeMap.MatchNamesWithUnderscores = true;
+            Dapper.SqlMapper.AddTypeMap(typeof(string), System.Data.DbType.AnsiString);
+            #endregion
+
+            #region :: Business ::
+            services.AddTransient<PessoaBL>();
+            #endregion
+
+            #region :: AutoMapper ::
+            var config = new AutoMapper.MapperConfiguration(cfg =>
+            {
+                cfg.CreateMap<PessoaEntity, PessoaModel>()
+                    .ForMember(d => d.CnpjCpf, s => s.MapFrom(x => x.IndicativoPfPj == "PF" ? x.PfCpf : x.PjCnpj))
+                    .ForMember(d => d.DataNascimentoFormatada, s => s.MapFrom(x => x.DataNascimento.ToString("dd/MM/yyyy HH:mm")))
+                    .ReverseMap();
+            });
+
+            IMapper mapper = config.CreateMapper();
+            services.AddSingleton(mapper);
             #endregion
 
             #region :: AppSettings ::
@@ -190,25 +210,12 @@ namespace Signa.TemplateCore.Api
             });
             #endregion
 
-            #region :: AutoMapper ::
-            var config = new AutoMapper.MapperConfiguration(cfg =>
-            {
-                cfg.CreateMap<PessoaEntity, PessoaModel>()
-                    .ForMember(d => d.CnpjCpf, s => s.MapFrom(x => x.IndicativoPfPj == "PF" ? x.PfCpf : x.PjCnpj))
-                    .ForMember(d => d.DataNascimentoFormatada, s => s.MapFrom(x => x.DataNascimento.ToString("dd/MM/yyyy HH:mm")))
-                    .ReverseMap();
-            });
-
-            IMapper mapper = config.CreateMapper();
-            services.AddSingleton(mapper);
-            #endregion
-
-            Dapper.SqlMapper.AddTypeMap(typeof(string), System.Data.DbType.AnsiString);
-
+            #region :: Other classes ::
             services.AddTransient<SignaRegraNegocioExceptionHandling>();
             services.AddTransient<SignaSqlNotFoundExceptionHandling>();
             services.AddTransient<SqlExceptionHandling>();
             services.AddTransient<GenericExceptionHandling>();
+            #endregion
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -233,7 +240,7 @@ namespace Signa.TemplateCore.Api
             app.UseSwaggerUI(c =>
             {
                 c.RoutePrefix = "docs";
-                c.SwaggerEndpoint("./v1/swagger.json", "API Login Ecargo");
+                c.SwaggerEndpoint("./v1/swagger.json", "Template de API .NET Core Signa");
             });
 
             app.UseHttpsRedirection();
@@ -245,7 +252,7 @@ namespace Signa.TemplateCore.Api
             app.UseMiddleware(typeof(ErrorHandlingMiddleware));
 
             #region :: Middleware Claims from JWT ::
-            //https://www.wellingtonjhn.com/posts/obtendo-o-usu%C3%A1rio-logado-em-apis-asp.net-core/
+            // DOC: https://www.wellingtonjhn.com/posts/obtendo-o-usu%C3%A1rio-logado-em-apis-asp.net-core/
             app.Use(async delegate (HttpContext httpContext, Func<Task> next)
             {
                 if (httpContext.User.Claims.Any())
@@ -253,6 +260,8 @@ namespace Signa.TemplateCore.Api
                     Globals.UsuarioId = int.Parse(httpContext.User.Claims.Where(c => c.Type == "UserId").FirstOrDefault().Value);
                     Globals.GrupoUsuarioId = int.Parse(httpContext.User.Claims.Where(c => c.Type == "UserGroupId")?.FirstOrDefault().Value);
                 }
+
+                Global.ConnectionString = Configuration["DATABASE_CONNECTION"];
 
                 await next.Invoke();
             });

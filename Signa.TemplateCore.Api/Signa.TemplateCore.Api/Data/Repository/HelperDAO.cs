@@ -2,9 +2,7 @@
 using Microsoft.Extensions.Configuration;
 using Signa.TemplateCore.Api.Data.Entities;
 using System;
-using System.Collections.Generic;
 using System.Data;
-using System.Linq;
 
 namespace Signa.TemplateCore.Api.Data.Repository
 {
@@ -13,20 +11,6 @@ namespace Signa.TemplateCore.Api.Data.Repository
         public HelperDAO(IConfiguration configuration)
         {
             base.configuration = configuration;
-        }
-
-        public Dictionary<int, string> BuscarParametros(params int[] ids)
-        {
-            using (IDbConnection db = Connection)
-            {
-                return db.Query(@"
-                    Select Tab_Parametro_Sistema_Id, Parametro
-                    From   Tab_Parametro_Sistema
-                    Where  Tab_Parametro_Sistema_Id In @Ids",
-                    new { Ids = ids }
-                    )
-                    .ToDictionary(row => (int)row.Tab_Parametro_Sistema_Id, row => (string)row.Parametro);
-            }
         }
 
         public void Gravar(LogMsg log)
