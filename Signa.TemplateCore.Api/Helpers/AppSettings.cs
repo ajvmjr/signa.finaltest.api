@@ -1,4 +1,4 @@
-﻿namespace Signa.TemplateCore.Api.Helpers
+namespace Signa.TemplateCore.Api.Helpers
 {
     public class AppSettings
     {
