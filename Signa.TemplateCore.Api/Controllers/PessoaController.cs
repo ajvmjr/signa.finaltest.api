@@ -1,5 +1,8 @@
+using System.Collections.Generic;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Signa.TemplateCore.Api.Business;
+using Signa.TemplateCore.Api.Domain.Models;
 
 namespace Signa.TemplateCore.Api.Controllers
 {
@@ -9,47 +12,38 @@ namespace Signa.TemplateCore.Api.Controllers
     [AllowAnonymous]
     public class PessoaController : Controller
     {
-        // private readonly PessoaBL _pessoaBLL;
+        private readonly PessoaBL _pessoaBLL;
 
-        // public PessoaController(PessoaBL pessoaBLL)
-        // {
-        //     _pessoaBLL = pessoaBLL;
-        // }
-
-        public PessoaController()
+        public PessoaController(PessoaBL pessoaBLL)
         {
+            _pessoaBLL = pessoaBLL;
         }
+
+        [HttpPost]
+        [Route("pessoa")]
+        [ProducesResponseType(type: typeof(PessoaModel), statusCode: 200)]
+        public IActionResult Insert(PessoaModel pessoa) => Ok(_pessoaBLL.Insert(pessoa));
+
+        [HttpGet]
+        [Route("pessoa/{id}")]
+        [ProducesResponseType(type: typeof(PessoaModel), statusCode: 200)]
+        public IActionResult GetById(int id) => Ok(_pessoaBLL.GetById(id));
 
         [HttpGet]
         [Route("pessoa")]
-        [ProducesResponseType(type: typeof(string), statusCode: 200)]
-        public IActionResult Get() => Ok("Teste");
+        [ProducesResponseType(type: typeof(IEnumerable<PessoaModel>), statusCode: 200)]
+        public IActionResult Get() => Ok(_pessoaBLL.Get());
 
-        // [HttpPost]
-        // [Route("pessoa")]
-        // [ProducesResponseType(type: typeof(PessoaModel), statusCode: 200)]
-        // public IActionResult Insert(PessoaModel pessoa) => Ok(_pessoaBLL.Insert(pessoa));
-
-        // [HttpGet]
-        // [Route("pessoa/{id}")]
-        // [ProducesResponseType(type: typeof(PessoaModel), statusCode: 200)]
-        // public IActionResult GetById(int id) => Ok(_pessoaBLL.GetById(id));
-
-        // [HttpGet]
-        // [Route("pessoa")]
-        // [ProducesResponseType(type: typeof(IEnumerable<PessoaModel>), statusCode: 200)]
-        // public IActionResult Get() => Ok(_pessoaBLL.Get());
-
-        // [HttpDelete]
-        // [Route("pessoa/{id}")]
-        // [ProducesResponseType(type: typeof(object), statusCode: 200)]
-        // public IActionResult DeletePessoa(int id)
-        // {
-        //     _pessoaBLL.Delete(id);
-        //     return Ok(new
-        //     {
-        //         Message = "Pessoa excluída com sucesso"
-        //     });
-        // }
+        [HttpDelete]
+        [Route("pessoa/{id}")]
+        [ProducesResponseType(type: typeof(object), statusCode: 200)]
+        public IActionResult DeletePessoa(int id)
+        {
+            _pessoaBLL.Delete(id);
+            return Ok(new
+            {
+                Message = "Pessoa excluída com sucesso"
+            });
+        }
     }
 }

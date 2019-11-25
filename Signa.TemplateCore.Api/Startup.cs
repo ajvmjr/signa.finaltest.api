@@ -24,7 +24,6 @@ using Signa.Library.Core.Exceptions;
 using Signa.Library.Core.Extensions;
 using Signa.TemplateCore.Api.Domain.Entities;
 using Signa.TemplateCore.Api.Helpers;
-using Swashbuckle.AspNetCore.Swagger;
 using static Signa.TemplateCore.Api.Filters.ValidateModel;
 
 namespace Signa.TemplateCore.Api
