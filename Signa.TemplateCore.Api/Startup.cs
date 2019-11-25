@@ -1,6 +1,8 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
+using System.Threading.Tasks;
 using AutoMapper;
 using Dapper;
 using FluentValidation.AspNetCore;
@@ -238,8 +240,24 @@ namespace Signa.TemplateCore.Api
             app.UseHttpsRedirection();
             app.UseResponseCompression();
             app.UseAuthentication();
+            app.UseAuthorization();
 
             loggerFactory.AddSerilog();
+
+            #region :: Middleware Claims from JWT ::
+            // DOC: https://www.wellingtonjhn.com/posts/obtendo-o-usu%C3%A1rio-logado-em-apis-asp.net-core/
+            app.Use(async delegate (HttpContext httpContext, Func<Task> next)
+            {
+                if (httpContext.User.Claims.Any())
+                {
+                    Global.UsuarioId = int.Parse(httpContext.User.Claims.Where(c => c.Type == "UserId").FirstOrDefault().Value);
+                }
+
+                Global.ConnectionString = Configuration["DATABASE_CONNECTION"];
+
+                await next.Invoke();
+            });
+            #endregion
 
             app.UseCors(config =>
             {
@@ -252,8 +270,6 @@ namespace Signa.TemplateCore.Api
             {
                 endpoints.MapControllers();
             });
-
-            // TODO: add middleware claims
         }
     }
 }
