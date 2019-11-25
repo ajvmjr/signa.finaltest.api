@@ -4,6 +4,8 @@ using System.IO;
 using AutoMapper;
 using Dapper;
 using FluentValidation.AspNetCore;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
@@ -11,11 +13,14 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 using Microsoft.OpenApi.Models;
 using Newtonsoft.Json;
+using Serilog;
 using Signa.Library.Core;
 using Signa.Library.Core.Exceptions;
 using Signa.Library.Core.Extensions;
+using Signa.TemplateCore.Api.Domain.Entities;
 using Signa.TemplateCore.Api.Helpers;
 using Swashbuckle.AspNetCore.Swagger;
 using static Signa.TemplateCore.Api.Filters.ValidateModel;
@@ -83,15 +88,15 @@ namespace Signa.TemplateCore.Api
                         }
                     });
 
-                // options.AddSecurityDefinition(
-                //     "Bearer",
-                //     new OpenApiSecurityScheme
-                //     {
-                //         In = ParameterLocation.Header,
-                //         Description = "Autenticação baseada em Json Web Token (JWT)",
-                //         Name = "Authorization",
-                //         Type = SecuritySchemeType.ApiKey
-                //     });
+                options.AddSecurityDefinition(
+                    "Bearer",
+                    new OpenApiSecurityScheme
+                    {
+                        In = ParameterLocation.Header,
+                        Description = "Autenticação baseada em Json Web Token (JWT)",
+                        Name = "Authorization",
+                        Type = SecuritySchemeType.ApiKey
+                    });
 
                 var xmlDocumentPath = Path.Combine(applicationBasePath, $"{applicationName}.xml");
 
@@ -159,57 +164,59 @@ namespace Signa.TemplateCore.Api
             #endregion
 
             #region :: JWT / Token / Auth ::
-            // var signingConfigurations = new SigningConfigurations(appSettings.Secret);
-            // services.AddSingleton(signingConfigurations);
+            var signingConfigurations = new SigningConfigurations(appSettings.Secret);
+            services.AddSingleton(signingConfigurations);
 
-            // var tokenConfigurations = new TokenConfigurations();
+            var tokenConfigurations = new TokenConfigurations();
 
-            // new ConfigureFromConfigurationOptions<TokenConfigurations>(
-            //     Configuration.GetSection("TokenConfigurations"))
-            //         .Configure(tokenConfigurations);
+            new ConfigureFromConfigurationOptions<TokenConfigurations>(
+                Configuration.GetSection("TokenConfigurations"))
+                    .Configure(tokenConfigurations);
 
-            // services.AddSingleton(tokenConfigurations);
+            services.AddSingleton(tokenConfigurations);
 
-            // services.AddAuthentication(authOptions =>
-            // {
-            //     authOptions.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
-            //     authOptions.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+            services
+                .AddAuthentication(authOptions =>
+                {
+                    authOptions.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+                    authOptions.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
 
-            // }).AddJwtBearer(bearerOptions =>
-            // {
-            //     bearerOptions.SaveToken = true;
+                })
+                .AddJwtBearer(bearerOptions =>
+                {
+                    bearerOptions.SaveToken = true;
 
-            //     var paramsValidation = bearerOptions.TokenValidationParameters;
+                    var paramsValidation = bearerOptions.TokenValidationParameters;
 
-            //     paramsValidation.IssuerSigningKey = signingConfigurations.Key;
+                    paramsValidation.IssuerSigningKey = signingConfigurations.Key;
 
-            //     // Valida a assinatura de um token recebido
-            //     paramsValidation.ValidateIssuerSigningKey = true;
-            //     paramsValidation.ValidateIssuer = false;
-            //     paramsValidation.ValidateAudience = false;
+                    // Valida a assinatura de um token recebido
+                    paramsValidation.ValidateIssuerSigningKey = true;
+                    paramsValidation.ValidateIssuer = false;
+                    paramsValidation.ValidateAudience = false;
 
-            //     // Verifica se um token recebido ainda é válido
-            //     paramsValidation.ValidateLifetime = true;
+                    // Verifica se um token recebido ainda é válido
+                    paramsValidation.ValidateLifetime = true;
 
-            //     // Tempo de tolerância para a expiração de um token (utilizado
-            //     // caso haja problemas de sincronismo de horário entre diferentes
-            //     // computadores envolvidos no processo de comunicação)
-            //     paramsValidation.ClockSkew = TimeSpan.Zero;
-            // });
+                    // Tempo de tolerância para a expiração de um token (utilizado
+                    // caso haja problemas de sincronismo de horário entre diferentes
+                    // computadores envolvidos no processo de comunicação)
+                    paramsValidation.ClockSkew = TimeSpan.Zero;
+                });
 
-            // // Ativa o uso do token como forma de autorizar o acesso
-            // // a recursos deste projeto
-            // services.AddAuthorization(auth =>
-            // {
-            //     auth.AddPolicy("Bearer", new AuthorizationPolicyBuilder()
-            //         .AddAuthenticationSchemes(JwtBearerDefaults.AuthenticationScheme‌​)
-            //         .RequireAuthenticatedUser().Build());
-            // });
+            // Ativa o uso do token como forma de autorizar o acesso
+            // a recursos deste projeto
+            services.AddAuthorization(auth =>
+            {
+                auth.AddPolicy("Bearer", new AuthorizationPolicyBuilder()
+                    .AddAuthenticationSchemes(JwtBearerDefaults.AuthenticationScheme‌​)
+                    .RequireAuthenticatedUser().Build());
+            });
             #endregion
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
-        public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
+        public void Configure(IApplicationBuilder app, IWebHostEnvironment env, ILoggerFactory loggerFactory)
         {
             if (env.IsDevelopment())
             {
@@ -232,6 +239,8 @@ namespace Signa.TemplateCore.Api
             app.UseResponseCompression();
             app.UseAuthentication();
 
+            loggerFactory.AddSerilog();
+
             app.UseCors(config =>
             {
                 config.AllowAnyHeader();
@@ -244,7 +253,6 @@ namespace Signa.TemplateCore.Api
                 endpoints.MapControllers();
             });
 
-            // TODO: add serilog
             // TODO: add middleware claims
         }
     }
