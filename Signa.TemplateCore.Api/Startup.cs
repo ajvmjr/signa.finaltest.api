@@ -5,6 +5,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using AutoMapper;
 using Dapper;
+using FluentValidation;
 using FluentValidation.AspNetCore;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
@@ -22,7 +23,10 @@ using Serilog;
 using Signa.Library.Core;
 using Signa.Library.Core.Exceptions;
 using Signa.Library.Core.Extensions;
+using Signa.TemplateCore.Api.Business;
+using Signa.TemplateCore.Api.Data.Repository;
 using Signa.TemplateCore.Api.Domain.Entities;
+using Signa.TemplateCore.Api.Domain.Models;
 using Signa.TemplateCore.Api.Helpers;
 using static Signa.TemplateCore.Api.Filters.ValidateModel;
 
@@ -64,7 +68,7 @@ namespace Signa.TemplateCore.Api
                 });
 
             #region :: Validators ::
-            // services.AddTransient<IValidator<PessoaModel>, PessoaValidator>();
+            services.AddTransient<IValidator<PessoaModel>, PessoaValidator>();
             #endregion
 
             #region :: Swagger ::
@@ -108,17 +112,17 @@ namespace Signa.TemplateCore.Api
             #endregion
 
             #region :: Acesso a Dados / Dapper ::
-            // services.AddTransient<HelperDAO>();
-            // services.AddTransient<DatabaseLog>();
-            // services.AddTransient<LogDatabaseDAO>();
-            // services.AddTransient<PessoaDAO>();
+            services.AddTransient<HelperDAO>();
+            services.AddTransient<DatabaseLog>();
+            services.AddTransient<LogDatabaseDAO>();
+            services.AddTransient<PessoaDAO>();
 
             DefaultTypeMap.MatchNamesWithUnderscores = true;
             Dapper.SqlMapper.AddTypeMap(typeof(string), System.Data.DbType.AnsiString);
             #endregion
 
             #region :: Business ::
-            // services.AddTransient<PessoaBL>();
+            services.AddTransient<PessoaBL>();
             #endregion
 
             #region :: Other classes ::
@@ -131,10 +135,10 @@ namespace Signa.TemplateCore.Api
             #region :: AutoMapper ::
             var config = new AutoMapper.MapperConfiguration(cfg =>
             {
-                // cfg.CreateMap<PessoaEntity, PessoaModel>()
-                //     .ForMember(d => d.CnpjCpf, s => s.MapFrom(x => x.IndicativoPfPj == "PF" ? x.PfCpf : x.PjCnpj))
-                //     .ForMember(d => d.DataNascimentoFormatada, s => s.MapFrom(x => x.DataNascimento.ToString("dd/MM/yyyy HH:mm")))
-                //     .ReverseMap();
+                cfg.CreateMap<PessoaEntity, PessoaModel>()
+                    .ForMember(d => d.CnpjCpf, s => s.MapFrom(x => x.IndicativoPfPj == "PF" ? x.PfCpf : x.PjCnpj))
+                    .ForMember(d => d.DataNascimentoFormatada, s => s.MapFrom(x => x.DataNascimento.ToString("dd/MM/yyyy HH:mm")))
+                    .ReverseMap();
             });
 
             IMapper mapper = config.CreateMapper();
