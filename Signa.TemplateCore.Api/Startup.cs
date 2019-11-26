@@ -28,6 +28,7 @@ using Signa.TemplateCore.Api.Data.Repository;
 using Signa.TemplateCore.Api.Domain.Entities;
 using Signa.TemplateCore.Api.Domain.Models;
 using Signa.TemplateCore.Api.Helpers;
+using static Signa.TemplateCore.Api.Data.Filters.ErrorHandlingMiddleware;
 using static Signa.TemplateCore.Api.Filters.ValidateModel;
 
 namespace Signa.TemplateCore.Api
