@@ -126,10 +126,10 @@ namespace Signa.TemplateCore.Api
             #endregion
 
             #region :: Other classes ::
-            // services.AddTransient<SignaRegraNegocioExceptionHandling>();
-            // services.AddTransient<SignaSqlNotFoundExceptionHandling>();
-            // services.AddTransient<SqlExceptionHandling>();
-            // services.AddTransient<GenericExceptionHandling>();
+            services.AddTransient<SignaRegraNegocioExceptionHandling>();
+            services.AddTransient<SignaSqlNotFoundExceptionHandling>();
+            services.AddTransient<SqlExceptionHandling>();
+            services.AddTransient<GenericExceptionHandling>();
             #endregion
 
             #region :: AutoMapper ::
