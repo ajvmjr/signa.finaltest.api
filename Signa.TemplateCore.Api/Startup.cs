@@ -1,4 +1,9 @@
-﻿using AutoMapper;
+using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
+using System.Threading.Tasks;
+using AutoMapper;
 using Dapper;
 using FluentValidation;
 using FluentValidation.AspNetCore;
@@ -7,47 +12,42 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
-using Microsoft.Extensions.PlatformAbstractions;
+using Microsoft.OpenApi.Models;
 using Newtonsoft.Json;
-using Signa.TemplateCore.Api.Data.Filters;
-using Signa.TemplateCore.Api.Data.Repository;
-using Signa.TemplateCore.Api.Filters;
-using Signa.TemplateCore.Api.Helpers;
-using Swashbuckle.AspNetCore.Swagger;
-using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Threading.Tasks;
-using static Signa.TemplateCore.Api.Filters.ValidateModel;
-using Signa.TemplateCore.Api.Domain.Models;
-using Signa.TemplateCore.Api.Domain.Entities;
-using static Signa.TemplateCore.Api.Data.Filters.ErrorHandlingMiddleware;
 using Serilog;
-using Signa.Library.Core.Extensions;
-using Signa.Library.Core.Exceptions;
 using Signa.Library.Core;
+using Signa.Library.Core.Exceptions;
+using Signa.Library.Core.Extensions;
 using Signa.TemplateCore.Api.Business;
-using Signa.Library.Core.Helpers;
+using Signa.TemplateCore.Api.Data.Repository;
+using Signa.TemplateCore.Api.Domain.Entities;
+using Signa.TemplateCore.Api.Domain.Models;
+using Signa.TemplateCore.Api.Helpers;
+using static Signa.TemplateCore.Api.Data.Filters.ErrorHandlingMiddleware;
+using static Signa.TemplateCore.Api.Filters.ValidateModel;
 
-[assembly: ApiConventionType(typeof(DefaultApiConventions))]
 namespace Signa.TemplateCore.Api
 {
     public class Startup
     {
-        public Startup(IConfiguration configuration)
+        public IConfiguration Configuration { get; }
+        private string applicationBasePath { get; }
+        private string applicationName { get; }
+
+        public Startup(IConfiguration configuration, IWebHostEnvironment env)
         {
             Configuration = configuration;
+            applicationBasePath = env.ContentRootPath;
+            applicationName = env.ApplicationName;
         }
 
-        public IConfiguration Configuration { get; }
-
         // This method gets called by the runtime. Use this method to add services to the container.
+        // For more information on how to configure your application, visit https://go.microsoft.com/fwlink/?LinkID=398940
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddAutoMapper(new Action<IMapperConfigurationExpression>(c =>
@@ -58,13 +58,15 @@ namespace Signa.TemplateCore.Api
                 {
                     options.Filters.Add(typeof(ValidateModelAttribute));
                 })
-                .SetCompatibilityVersion(CompatibilityVersion.Version_2_2)
-                .AddJsonOptions(options =>
+                .AddFluentValidation();
+
+            services.AddControllers()
+                .AddNewtonsoftJson(options =>
                 {
                     options.SerializerSettings.Formatting = Formatting.Indented;
                     options.SerializerSettings.NullValueHandling = NullValueHandling.Ignore;
                     options.SerializerSettings.Converters = new List<JsonConverter> { new ConfigurationsHelper.DecimalConverter() };
-                }).AddFluentValidation();
+                });
 
             #region :: Validators ::
             services.AddTransient<IValidator<PessoaModel>, PessoaValidator>();
@@ -79,38 +81,34 @@ namespace Signa.TemplateCore.Api
             services.AddSwaggerGen(options =>
             {
                 options.SwaggerDoc("v1",
-                    new Info
+                    new OpenApiInfo
                     {
                         Title = "Signa consultoria e Sistemas",
                         Version = "v1",
                         Description = "API Template Signa",
-                        Contact = new Contact
+                        Contact = new OpenApiContact
                         {
                             Name = "Signa",
-                            Url = "http://signainfo.com.br"
+                            Url = new Uri("http://signainfo.com.br")
                         }
                     });
 
                 options.AddSecurityDefinition(
-                    "bearer",
-                    new ApiKeyScheme
+                    "Bearer",
+                    new OpenApiSecurityScheme
                     {
-                        In = "header",
+                        In = ParameterLocation.Header,
                         Description = "Autenticação baseada em Json Web Token (JWT)",
                         Name = "Authorization",
-                        Type = "apiKey"
+                        Type = SecuritySchemeType.ApiKey
                     });
 
-                var applicationBasePath = PlatformServices.Default.Application.ApplicationBasePath;
-                var applicationName = PlatformServices.Default.Application.ApplicationName;
                 var xmlDocumentPath = Path.Combine(applicationBasePath, $"{applicationName}.xml");
 
                 if (File.Exists(xmlDocumentPath))
                 {
                     options.IncludeXmlComments(xmlDocumentPath);
                 }
-
-                options.OperationFilter<FormFileSwaggerFilter>();
             });
             #endregion
 
@@ -126,6 +124,13 @@ namespace Signa.TemplateCore.Api
 
             #region :: Business ::
             services.AddTransient<PessoaBL>();
+            #endregion
+
+            #region :: Other classes ::
+            services.AddTransient<SignaRegraNegocioExceptionHandling>();
+            services.AddTransient<SignaSqlNotFoundExceptionHandling>();
+            services.AddTransient<SqlExceptionHandling>();
+            services.AddTransient<GenericExceptionHandling>();
             #endregion
 
             #region :: AutoMapper ::
@@ -173,32 +178,34 @@ namespace Signa.TemplateCore.Api
 
             services.AddSingleton(tokenConfigurations);
 
-            services.AddAuthentication(authOptions =>
-            {
-                authOptions.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
-                authOptions.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+            services
+                .AddAuthentication(authOptions =>
+                {
+                    authOptions.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+                    authOptions.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
 
-            }).AddJwtBearer(bearerOptions =>
-            {
-                bearerOptions.SaveToken = true;
+                })
+                .AddJwtBearer(bearerOptions =>
+                {
+                    bearerOptions.SaveToken = true;
 
-                var paramsValidation = bearerOptions.TokenValidationParameters;
+                    var paramsValidation = bearerOptions.TokenValidationParameters;
 
-                paramsValidation.IssuerSigningKey = signingConfigurations.Key;
+                    paramsValidation.IssuerSigningKey = signingConfigurations.Key;
 
-                // Valida a assinatura de um token recebido
-                paramsValidation.ValidateIssuerSigningKey = true;
-                paramsValidation.ValidateIssuer = false;
-                paramsValidation.ValidateAudience = false;
+                    // Valida a assinatura de um token recebido
+                    paramsValidation.ValidateIssuerSigningKey = true;
+                    paramsValidation.ValidateIssuer = false;
+                    paramsValidation.ValidateAudience = false;
 
-                // Verifica se um token recebido ainda é válido
-                paramsValidation.ValidateLifetime = true;
+                    // Verifica se um token recebido ainda é válido
+                    paramsValidation.ValidateLifetime = true;
 
-                // Tempo de tolerância para a expiração de um token (utilizado
-                // caso haja problemas de sincronismo de horário entre diferentes
-                // computadores envolvidos no processo de comunicação)
-                paramsValidation.ClockSkew = TimeSpan.Zero;
-            });
+                    // Tempo de tolerância para a expiração de um token (utilizado
+                    // caso haja problemas de sincronismo de horário entre diferentes
+                    // computadores envolvidos no processo de comunicação)
+                    paramsValidation.ClockSkew = TimeSpan.Zero;
+                });
 
             // Ativa o uso do token como forma de autorizar o acesso
             // a recursos deste projeto
@@ -209,27 +216,14 @@ namespace Signa.TemplateCore.Api
                     .RequireAuthenticatedUser().Build());
             });
             #endregion
-
-            #region :: Other classes ::
-            services.AddTransient<SignaRegraNegocioExceptionHandling>();
-            services.AddTransient<SignaSqlNotFoundExceptionHandling>();
-            services.AddTransient<SqlExceptionHandling>();
-            services.AddTransient<GenericExceptionHandling>();
-            #endregion
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
-        public void Configure(IApplicationBuilder app, IHostingEnvironment env, ILoggerFactory loggerFactory)
+        public void Configure(IApplicationBuilder app, IWebHostEnvironment env, ILoggerFactory loggerFactory)
         {
-
             if (env.IsDevelopment())
             {
                 app.UseDeveloperExceptionPage();
-            }
-            else
-            {
-                app.UseDeveloperExceptionPage();
-                app.UseHsts();
             }
 
             app.UseSwagger(c =>
@@ -243,13 +237,13 @@ namespace Signa.TemplateCore.Api
                 c.SwaggerEndpoint("./v1/swagger.json", "Template de API .NET Core Signa");
             });
 
+            app.UseRouting();
             app.UseHttpsRedirection();
             app.UseResponseCompression();
             app.UseAuthentication();
+            app.UseAuthorization();
 
             loggerFactory.AddSerilog();
-
-            app.UseMiddleware(typeof(ErrorHandlingMiddleware));
 
             #region :: Middleware Claims from JWT ::
             // DOC: https://www.wellingtonjhn.com/posts/obtendo-o-usu%C3%A1rio-logado-em-apis-asp.net-core/
@@ -257,8 +251,7 @@ namespace Signa.TemplateCore.Api
             {
                 if (httpContext.User.Claims.Any())
                 {
-                    Globals.UsuarioId = int.Parse(httpContext.User.Claims.Where(c => c.Type == "UserId").FirstOrDefault().Value);
-                    Globals.GrupoUsuarioId = int.Parse(httpContext.User.Claims.Where(c => c.Type == "UserGroupId")?.FirstOrDefault().Value);
+                    Global.UsuarioId = int.Parse(httpContext.User.Claims.Where(c => c.Type == "UserId").FirstOrDefault().Value);
                 }
 
                 Global.ConnectionString = Configuration["DATABASE_CONNECTION"];
@@ -274,7 +267,10 @@ namespace Signa.TemplateCore.Api
                 config.AllowAnyOrigin();
             });
 
-            app.UseMvc();
+            app.UseEndpoints(endpoints =>
+            {
+                endpoints.MapControllers();
+            });
         }
     }
 }

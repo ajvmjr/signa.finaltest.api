@@ -1,6 +1,5 @@
-﻿using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Http.Internal;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
@@ -69,7 +68,7 @@ namespace Signa.TemplateCore.Api.Data.Filters
         private async Task<string> FormatRequest(HttpRequest request)
         {
             var body = request.Body;
-            request.EnableRewind();
+            request.EnableBuffering();
 
             var buffer = new byte[Convert.ToInt32(request.ContentLength)];
             await request.Body.ReadAsync(buffer, 0, buffer.Length);
@@ -100,9 +99,6 @@ namespace Signa.TemplateCore.Api.Data.Filters
 
     public static class RequestResponseLoggingMiddlewareExtensions
     {
-        public static IApplicationBuilder UseRequestResponseLogging(this IApplicationBuilder builder)
-        {
-            return builder.UseMiddleware<RequestResponseLoggingMiddleware>();
-        }
+        public static IApplicationBuilder UseRequestResponseLogging(this IApplicationBuilder builder) => builder.UseMiddleware<RequestResponseLoggingMiddleware>();
     }
 }

@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Xml;
 
 namespace Signa.TemplateCore.Api.Data.Entities

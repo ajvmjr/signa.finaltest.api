@@ -1,4 +1,4 @@
-﻿using Microsoft.IdentityModel.Tokens;
+using Microsoft.IdentityModel.Tokens;
 using System;
 using System.Security.Cryptography;
 using System.Text;
@@ -31,13 +31,5 @@ namespace Signa.TemplateCore.Api.Domain.Entities
                 SigningCredentials = new SigningCredentials(Key, SecurityAlgorithms.HmacSha256Signature);
             }
         }
-    }
-
-    public class RefreshTokenData
-    {
-        public string RefreshToken { get; set; }
-        public int UserId { get; set; }
-        public int UserGroupId { get; set; }
-        public DateTime CreationDate { get; set; }
     }
 }

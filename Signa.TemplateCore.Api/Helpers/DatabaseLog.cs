@@ -1,5 +1,6 @@
-﻿using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
+using Signa.Library.Core;
 using Signa.TemplateCore.Api.Data.Entities;
 using Signa.TemplateCore.Api.Data.Repository;
 using System;
@@ -52,11 +53,11 @@ namespace Signa.TemplateCore.Api.Helpers
                     Msg03 = msg03,
                     Msg04 = msg04,
                     Msg05 = context.Request.Path,
-                    UsuarioInternetId = Globals.UsuarioId,
+                    UsuarioInternetId = Global.UsuarioId,
                     DataLog = DateTime.Now
                 };
 
-                if (Globals.UsuarioId == 1)
+                if (Global.UsuarioId == 1)
                 {
                     mensagemRetorno += log.Msg03 + " " + log.Msg02;
                 }

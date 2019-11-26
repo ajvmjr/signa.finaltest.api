@@ -1,4 +1,5 @@
-﻿using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Configuration;
+using Signa.Library.Core;
 using System.Data;
 using System.Data.SqlClient;
 
@@ -6,8 +7,7 @@ namespace Signa.TemplateCore.Api.Data.Repository
 {
     public abstract class RepositoryBase
     {
-        protected const string _n = "\n";
-        protected int _usuarioId = Globals.UsuarioId.GetValueOrDefault();
+        protected int _usuarioId = Global.UsuarioId;
         protected IConfiguration configuration;
 
         internal IDbConnection Connection

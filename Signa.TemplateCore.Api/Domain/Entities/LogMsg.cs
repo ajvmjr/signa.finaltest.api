@@ -1,4 +1,4 @@
-﻿using Signa.TemplateCore.Api.Helpers;
+using Signa.TemplateCore.Api.Helpers;
 using System;
 
 namespace Signa.TemplateCore.Api.Data.Entities

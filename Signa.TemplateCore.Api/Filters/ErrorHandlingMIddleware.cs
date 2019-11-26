@@ -1,4 +1,4 @@
-﻿using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Http;
 using Newtonsoft.Json;
 using Signa.TemplateCore.Api.Data.Repository;
 using Signa.TemplateCore.Api.Helpers;
@@ -9,6 +9,7 @@ using System.Net;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
+using Signa.Library.Core;
 
 namespace Signa.TemplateCore.Api.Data.Filters
 {
@@ -194,7 +195,7 @@ namespace Signa.TemplateCore.Api.Data.Filters
                 {
                     _helperDAO.Gravar(new Data.Entities.LogMsg
                     {
-                        UsuarioInternetId = Globals.UsuarioId,
+                        UsuarioInternetId = Global.UsuarioId,
                         DataLog = DateTime.Now,
                         Msg01 = result
                     });
