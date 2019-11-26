@@ -34,7 +34,6 @@ namespace Signa.TemplateCore.Api
         private string applicationBasePath { get; }
         private string applicationName { get; }
 
-
         public Startup(IConfiguration configuration, IWebHostEnvironment env)
         {
             Configuration = configuration;
@@ -105,8 +104,6 @@ namespace Signa.TemplateCore.Api
                 {
                     options.IncludeXmlComments(xmlDocumentPath);
                 }
-
-                // options.OperationFilter<FormFileSwaggerFilter>();
             });
             #endregion
 
@@ -226,12 +223,12 @@ namespace Signa.TemplateCore.Api
 
             app.UseSwagger(c =>
             {
-                c.RouteTemplate = "{documentName}/swagger.json";
+                c.RouteTemplate = "docs/{documentName}/swagger.json";
             });
 
             app.UseSwaggerUI(c =>
             {
-                c.RoutePrefix = string.Empty;
+                c.RoutePrefix = "docs";
                 c.SwaggerEndpoint("./v1/swagger.json", "Template de API .NET Core Signa");
             });
 
