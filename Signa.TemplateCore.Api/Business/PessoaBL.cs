@@ -1,14 +1,10 @@
 using AutoMapper;
-using Microsoft.IdentityModel.Tokens;
 using Signa.Library.Core.Exceptions;
 using Signa.Library.Core.Extensions;
 using Signa.TemplateCore.Api.Data.Repository;
 using Signa.TemplateCore.Api.Domain.Entities;
 using Signa.TemplateCore.Api.Domain.Models;
-using System;
 using System.Collections.Generic;
-using System.IdentityModel.Tokens.Jwt;
-using System.Security.Claims;
 
 namespace Signa.TemplateCore.Api.Business
 {
@@ -16,20 +12,14 @@ namespace Signa.TemplateCore.Api.Business
     {
         private readonly IMapper _mapper;
         private readonly PessoaDAO _pessoaDAO;
-        private TokenConfigurations _tokenConfigurations;
-        private SigningConfigurations _signingConfigurations;
 
         public PessoaBL(
             IMapper mapper,
-            PessoaDAO pessoaDAO,
-            TokenConfigurations tokenConfigurations,
-            SigningConfigurations signingConfigurations
+            PessoaDAO pessoaDAO
         )
         {
             _mapper = mapper;
             _pessoaDAO = pessoaDAO;
-            _tokenConfigurations = tokenConfigurations;
-            _signingConfigurations = signingConfigurations;
         }
 
         public PessoaModel Insert(PessoaModel pessoa)
