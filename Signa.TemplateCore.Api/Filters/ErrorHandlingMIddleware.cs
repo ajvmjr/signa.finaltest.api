@@ -13,6 +13,7 @@ using Signa.Library.Core;
 
 namespace Signa.TemplateCore.Api.Data.Filters
 {
+    // TODO: incluir em Signa.Library.Api
     public class ErrorHandlingMiddleware
     {
         private readonly RequestDelegate next;

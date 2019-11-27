@@ -11,6 +11,7 @@ namespace Signa.TemplateCore.Api.Data.Repository
             base.configuration = configuration;
         }
 
+        // TODO: incluir em Signa.Library
         public void Insert(LogExecucao log)
         {
             using (var db = Connection)

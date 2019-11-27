@@ -12,6 +12,7 @@ using System.Xml;
 
 namespace Signa.TemplateCore.Api.Data.Filters
 {
+    // TODO: incluir em Signa.Library.Api
     public class RequestResponseLoggingMiddleware
     {
         private readonly RequestDelegate _next;

@@ -3,6 +3,7 @@ using System;
 
 namespace Signa.TemplateCore.Api.Data.Entities
 {
+    // TODO: incluir em Signa.Library
     public class LogMsg
     {
         private string _msg01;
@@ -13,7 +14,7 @@ namespace Signa.TemplateCore.Api.Data.Entities
             get { return _msg01; }
             set
             {
-                var messages = value.SplitBy(255, 5);
+                var messages = value.SplitBy(8000, 5);
                 _msg01 = messages[0];
                 Msg02 = messages[1];
                 Msg03 = messages[2];

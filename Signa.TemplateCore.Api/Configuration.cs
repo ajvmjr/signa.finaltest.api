@@ -4,6 +4,7 @@ using System;
 
 namespace Signa.TemplateCore.Api.ConfigurationsHelper
 {
+    // TODO: incluir em Signa.Library.Api
     internal class DecimalConverter : JsonConverter
     {
         public override bool CanConvert(Type objectType)

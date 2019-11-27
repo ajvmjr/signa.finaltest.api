@@ -2,6 +2,7 @@ using System;
 
 namespace Signa.TemplateCore.Api.Helpers
 {
+    // TODO: incluir em Signa.Library
     public static class Extensions
     {
         public static bool IsNumeric(this string s)

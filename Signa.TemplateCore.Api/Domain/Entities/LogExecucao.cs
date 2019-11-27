@@ -3,6 +3,7 @@ using System.Xml;
 
 namespace Signa.TemplateCore.Api.Data.Entities
 {
+    // TODO: incluir em Signa.Library
     public class LogExecucao
     {
         public DateTime DataExecucao { get; set; }

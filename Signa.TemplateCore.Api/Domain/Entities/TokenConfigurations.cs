@@ -5,6 +5,7 @@ using System.Text;
 
 namespace Signa.TemplateCore.Api.Domain.Entities
 {
+    // TODO: incluir em Signa.Library.Api
     public class TokenConfigurations
     {
         public int Minutes { get; set; }

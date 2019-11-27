@@ -44,6 +44,7 @@ namespace Signa.TemplateCore.Api
             Configuration = configuration;
             applicationBasePath = env.ContentRootPath;
             applicationName = env.ApplicationName;
+            Global.ConnectionString = Configuration["DATABASE_CONNECTION"];
         }
 
         // This method gets called by the runtime. Use this method to add services to the container.
@@ -69,6 +70,7 @@ namespace Signa.TemplateCore.Api
                 });
 
             #region :: Validators ::
+            // TODO: validações de banco no validador
             services.AddTransient<IValidator<PessoaModel>, PessoaValidator>();
             #endregion
 
@@ -127,6 +129,7 @@ namespace Signa.TemplateCore.Api
             #endregion
 
             #region :: Other classes ::
+            // TODO: deixar em uma inclusão apenas
             services.AddTransient<SignaRegraNegocioExceptionHandling>();
             services.AddTransient<SignaSqlNotFoundExceptionHandling>();
             services.AddTransient<SqlExceptionHandling>();
@@ -136,6 +139,7 @@ namespace Signa.TemplateCore.Api
             #region :: AutoMapper ::
             var config = new AutoMapper.MapperConfiguration(cfg =>
             {
+                // TODO: seria possível deixar isso em outras classes?
                 cfg.CreateMap<PessoaEntity, PessoaModel>()
                     .ForMember(d => d.CnpjCpf, s => s.MapFrom(x => x.IndicativoPfPj == "PF" ? x.PfCpf : x.PjCnpj))
                     .ForMember(d => d.DataNascimentoFormatada, s => s.MapFrom(x => x.DataNascimento.ToString("dd/MM/yyyy HH:mm")))
@@ -150,6 +154,7 @@ namespace Signa.TemplateCore.Api
             var appSettingsSection = Configuration.GetSection("AppSettings");
             services.Configure<AppSettings>(appSettingsSection);
 
+            // TODO: trocar pelo startup validator
             var appSettings = appSettingsSection.Get<AppSettings>();
 
             if (appSettings.FuncaoId.IsZeroOrNull())
@@ -253,8 +258,6 @@ namespace Signa.TemplateCore.Api
                 {
                     Global.UsuarioId = int.Parse(httpContext.User.Claims.Where(c => c.Type == "UserId").FirstOrDefault().Value);
                 }
-
-                Global.ConnectionString = Configuration["DATABASE_CONNECTION"];
 
                 await next.Invoke();
             });

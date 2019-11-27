@@ -9,6 +9,7 @@ using System.Linq;
 
 namespace Signa.TemplateCore.Api.Helpers
 {
+    // TODO: incluir em Signa.Library.Api
     public class DatabaseLog
     {
         private readonly HelperDAO helperDAO;
