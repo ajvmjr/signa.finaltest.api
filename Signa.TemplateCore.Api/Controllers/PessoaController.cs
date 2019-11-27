@@ -1,8 +1,9 @@
-using System.Collections.Generic;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Signa.Library.Core.Aspnet.Domain.Models;
 using Signa.TemplateCore.Api.Business;
 using Signa.TemplateCore.Api.Domain.Models;
+using System.Collections.Generic;
 
 namespace Signa.TemplateCore.Api.Controllers
 {
@@ -36,14 +37,11 @@ namespace Signa.TemplateCore.Api.Controllers
 
         [HttpDelete]
         [Route("pessoa/{id}")]
-        [ProducesResponseType(type: typeof(object), statusCode: 200)]
+        [ProducesResponseType(type: typeof(MessageReturnModel), statusCode: 200)]
         public IActionResult DeletePessoa(int id)
         {
             _pessoaBLL.Delete(id);
-            return Ok(new
-            {
-                Message = "Pessoa excluída com sucesso"
-            });
+            return Ok(new MessageReturnModel("Pessoa excluída com sucesso"));
         }
     }
 }

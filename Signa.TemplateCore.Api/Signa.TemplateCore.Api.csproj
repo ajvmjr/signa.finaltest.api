@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk.Web">
+﻿<Project Sdk="Microsoft.NET.Sdk.Web">
 
   <PropertyGroup>
     <TargetFramework>netcoreapp3.0</TargetFramework>
@@ -14,7 +14,8 @@
     <PackageReference Include="Serilog.Aspnetcore" Version="3.2.0" />
     <PackageReference Include="Serilog.sinks.console" Version="3.1.1" />
     <PackageReference Include="Serilog.sinks.file" Version="4.1.0" />
-    <PackageReference Include="signa.library.core" Version="2.1.0" />
+    <PackageReference Include="signa.library.core" Version="2.2.0-rc" />
+    <PackageReference Include="Signa.Library.Core.Aspnet" Version="1.0.0-rc2" />
     <PackageReference Include="swashbuckle.aspnetcore" Version="5.0.0-rc4" />
   </ItemGroup>
 

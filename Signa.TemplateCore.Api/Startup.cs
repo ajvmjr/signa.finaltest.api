@@ -1,8 +1,3 @@
-using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Threading.Tasks;
 using AutoMapper;
 using Dapper;
 using FluentValidation;
@@ -21,30 +16,39 @@ using Microsoft.OpenApi.Models;
 using Newtonsoft.Json;
 using Serilog;
 using Signa.Library.Core;
-using Signa.Library.Core.Exceptions;
-using Signa.Library.Core.Extensions;
+using Signa.Library.Core.Aspnet.Domain.Entities;
+using Signa.Library.Core.Aspnet.Filters;
+using Signa.Library.Core.Aspnet.Filters.ErrorHandlings;
+using Signa.Library.Core.Aspnet.Helpers;
+using Signa.Library.Core.Helpers;
 using Signa.TemplateCore.Api.Business;
 using Signa.TemplateCore.Api.Data.Repository;
 using Signa.TemplateCore.Api.Domain.Entities;
 using Signa.TemplateCore.Api.Domain.Models;
-using Signa.TemplateCore.Api.Helpers;
-using static Signa.TemplateCore.Api.Data.Filters.ErrorHandlingMiddleware;
-using static Signa.TemplateCore.Api.Filters.ValidateModel;
+using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
+using System.Threading.Tasks;
 
 namespace Signa.TemplateCore.Api
 {
     public class Startup
     {
         public IConfiguration Configuration { get; }
+        private readonly StartupValidator _startupValidator;
         private string applicationBasePath { get; }
         private string applicationName { get; }
 
-        public Startup(IConfiguration configuration, IWebHostEnvironment env)
+        public Startup(
+            IConfiguration configuration,
+            IWebHostEnvironment env)
         {
             Configuration = configuration;
             applicationBasePath = env.ContentRootPath;
             applicationName = env.ApplicationName;
             Global.ConnectionString = Configuration["DATABASE_CONNECTION"];
+            _startupValidator = new StartupValidator();
         }
 
         // This method gets called by the runtime. Use this method to add services to the container.
@@ -66,7 +70,7 @@ namespace Signa.TemplateCore.Api
                 {
                     options.SerializerSettings.Formatting = Formatting.Indented;
                     options.SerializerSettings.NullValueHandling = NullValueHandling.Ignore;
-                    options.SerializerSettings.Converters = new List<JsonConverter> { new ConfigurationsHelper.DecimalConverter() };
+                    options.SerializerSettings.Converters = new List<JsonConverter> { new DecimalConverter() };
                 });
 
             #region :: Validators ::
@@ -115,20 +119,21 @@ namespace Signa.TemplateCore.Api
             #endregion
 
             #region :: Acesso a Dados / Dapper ::
-            services.AddTransient<HelperDAO>();
-            services.AddTransient<DatabaseLog>();
-            services.AddTransient<LogDatabaseDAO>();
             services.AddTransient<PessoaDAO>();
 
             DefaultTypeMap.MatchNamesWithUnderscores = true;
             Dapper.SqlMapper.AddTypeMap(typeof(string), System.Data.DbType.AnsiString);
             #endregion
 
+            #region :: Generic Classes ::
+            services.AddTransient<CommonHelper>();
+            #endregion
+
             #region :: Business ::
             services.AddTransient<PessoaBL>();
             #endregion
 
-            #region :: Other classes ::
+            #region :: Filters ::
             // TODO: deixar em uma inclusão apenas
             services.AddTransient<SignaRegraNegocioExceptionHandling>();
             services.AddTransient<SignaSqlNotFoundExceptionHandling>();
@@ -157,18 +162,12 @@ namespace Signa.TemplateCore.Api
             // TODO: trocar pelo startup validator
             var appSettings = appSettingsSection.Get<AppSettings>();
 
-            if (appSettings.FuncaoId.IsZeroOrNull())
-            {
-                throw new SignaRegraNegocioException("Necessário incluir o id da função");
-            }
+#if DEBUG
+            appSettings.NomeApi = "Signa.TemplateCore.Api";
+            appSettings.FuncaoId = 2;
+#endif
 
-            if (appSettings.NomeApi.IsNullEmptyOrWhiteSpace())
-            {
-                throw new SignaRegraNegocioException("Necessário incluir o nome da api");
-            }
-
-            Global.FuncaoId = appSettings.FuncaoId;
-            Global.NomeProjeto = appSettings.NomeApi;
+            _startupValidator.Validate(appSettings);
             #endregion
 
             #region :: JWT / Token / Auth ::
