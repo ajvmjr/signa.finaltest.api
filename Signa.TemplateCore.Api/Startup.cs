@@ -249,6 +249,8 @@ namespace Signa.TemplateCore.Api
 
             loggerFactory.AddSerilog();
 
+            app.UseMiddleware(typeof(ErrorHandlingMiddleware));
+
             #region :: Middleware Claims from JWT ::
             // DOC: https://www.wellingtonjhn.com/posts/obtendo-o-usu%C3%A1rio-logado-em-apis-asp.net-core/
             app.Use(async delegate (HttpContext httpContext, Func<Task> next)
