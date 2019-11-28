@@ -42,26 +42,26 @@ namespace Signa.TemplateCore.Api.Business
 
         public PessoaModel GetById(int id)
         {
-            var pessoa = _mapper.Map<PessoaModel>(_pessoaDAO.GetById(id));
+            var pessoa = _pessoaDAO.GetById(id);
 
             if (pessoa == null)
             {
                 throw new SignaSqlNotFoundException("Nenhuma pessoa encontrada com esse id");
             }
 
-            return pessoa;
+            return _mapper.Map<PessoaModel>(pessoa);
         }
 
         public IEnumerable<PessoaModel> Get()
         {
-            var results = _mapper.Map<IEnumerable<PessoaModel>>(_pessoaDAO.Get());
+            var results = _pessoaDAO.Get();
 
             if (results.IsNullOrEmpty())
             {
                 throw new SignaSqlNotFoundException("Nenhuma pessoa encontrada");
             }
 
-            return results;
+            return _mapper.Map<IEnumerable<PessoaModel>>(results);
         }
 
         public void Delete(int id)

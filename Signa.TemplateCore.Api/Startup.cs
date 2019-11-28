@@ -20,7 +20,7 @@ using Signa.Library.Core.Aspnet.Domain.Entities;
 using Signa.Library.Core.Aspnet.Filters;
 using Signa.Library.Core.Aspnet.Filters.ErrorHandlings;
 using Signa.Library.Core.Aspnet.Helpers;
-using Signa.Library.Core.Helpers;
+using Signa.Library.Core.Data.Repository;
 using Signa.TemplateCore.Api.Business;
 using Signa.TemplateCore.Api.Data.Repository;
 using Signa.TemplateCore.Api.Domain.Entities;
@@ -126,7 +126,7 @@ namespace Signa.TemplateCore.Api
             #endregion
 
             #region :: Generic Classes ::
-            services.AddTransient<CommonHelper>();
+            services.AddTransient<HelperRepository>();
             #endregion
 
             #region :: Business ::
