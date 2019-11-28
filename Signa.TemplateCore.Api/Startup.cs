@@ -1,8 +1,3 @@
-using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Threading.Tasks;
 using AutoMapper;
 using Dapper;
 using FluentValidation;
@@ -21,29 +16,39 @@ using Microsoft.OpenApi.Models;
 using Newtonsoft.Json;
 using Serilog;
 using Signa.Library.Core;
-using Signa.Library.Core.Exceptions;
-using Signa.Library.Core.Extensions;
+using Signa.Library.Core.Aspnet.Domain.Entities;
+using Signa.Library.Core.Aspnet.Filters;
+using Signa.Library.Core.Aspnet.Filters.ErrorHandlings;
+using Signa.Library.Core.Aspnet.Helpers;
+using Signa.Library.Core.Data.Repository;
 using Signa.TemplateCore.Api.Business;
 using Signa.TemplateCore.Api.Data.Repository;
 using Signa.TemplateCore.Api.Domain.Entities;
 using Signa.TemplateCore.Api.Domain.Models;
-using Signa.TemplateCore.Api.Helpers;
-using static Signa.TemplateCore.Api.Data.Filters.ErrorHandlingMiddleware;
-using static Signa.TemplateCore.Api.Filters.ValidateModel;
+using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
+using System.Threading.Tasks;
 
 namespace Signa.TemplateCore.Api
 {
     public class Startup
     {
         public IConfiguration Configuration { get; }
+        private readonly StartupValidator _startupValidator;
         private string applicationBasePath { get; }
         private string applicationName { get; }
 
-        public Startup(IConfiguration configuration, IWebHostEnvironment env)
+        public Startup(
+            IConfiguration configuration,
+            IWebHostEnvironment env)
         {
             Configuration = configuration;
             applicationBasePath = env.ContentRootPath;
             applicationName = env.ApplicationName;
+            Global.ConnectionString = Configuration["DATABASE_CONNECTION"];
+            _startupValidator = new StartupValidator();
         }
 
         // This method gets called by the runtime. Use this method to add services to the container.
@@ -65,10 +70,11 @@ namespace Signa.TemplateCore.Api
                 {
                     options.SerializerSettings.Formatting = Formatting.Indented;
                     options.SerializerSettings.NullValueHandling = NullValueHandling.Ignore;
-                    options.SerializerSettings.Converters = new List<JsonConverter> { new ConfigurationsHelper.DecimalConverter() };
+                    options.SerializerSettings.Converters = new List<JsonConverter> { new DecimalConverter() };
                 });
 
             #region :: Validators ::
+            // TODO: validações de banco no validador
             services.AddTransient<IValidator<PessoaModel>, PessoaValidator>();
             #endregion
 
@@ -113,20 +119,22 @@ namespace Signa.TemplateCore.Api
             #endregion
 
             #region :: Acesso a Dados / Dapper ::
-            services.AddTransient<HelperDAO>();
-            services.AddTransient<DatabaseLog>();
-            services.AddTransient<LogDatabaseDAO>();
             services.AddTransient<PessoaDAO>();
 
             DefaultTypeMap.MatchNamesWithUnderscores = true;
             Dapper.SqlMapper.AddTypeMap(typeof(string), System.Data.DbType.AnsiString);
             #endregion
 
+            #region :: Generic Classes ::
+            services.AddTransient<HelperRepository>();
+            #endregion
+
             #region :: Business ::
             services.AddTransient<PessoaBL>();
             #endregion
 
-            #region :: Other classes ::
+            #region :: Filters ::
+            // TODO: deixar em uma inclusão apenas
             services.AddTransient<SignaRegraNegocioExceptionHandling>();
             services.AddTransient<SignaSqlNotFoundExceptionHandling>();
             services.AddTransient<SqlExceptionHandling>();
@@ -136,6 +144,7 @@ namespace Signa.TemplateCore.Api
             #region :: AutoMapper ::
             var config = new AutoMapper.MapperConfiguration(cfg =>
             {
+                // TODO: seria possível deixar isso em outras classes?
                 cfg.CreateMap<PessoaEntity, PessoaModel>()
                     .ForMember(d => d.CnpjCpf, s => s.MapFrom(x => x.IndicativoPfPj == "PF" ? x.PfCpf : x.PjCnpj))
                     .ForMember(d => d.DataNascimentoFormatada, s => s.MapFrom(x => x.DataNascimento.ToString("dd/MM/yyyy HH:mm")))
@@ -150,20 +159,15 @@ namespace Signa.TemplateCore.Api
             var appSettingsSection = Configuration.GetSection("AppSettings");
             services.Configure<AppSettings>(appSettingsSection);
 
+            // TODO: trocar pelo startup validator
             var appSettings = appSettingsSection.Get<AppSettings>();
 
-            if (appSettings.FuncaoId.IsZeroOrNull())
-            {
-                throw new SignaRegraNegocioException("Necessário incluir o id da função");
-            }
+#if DEBUG
+            appSettings.NomeApi = "Signa.TemplateCore.Api";
+            appSettings.FuncaoId = 2;
+#endif
 
-            if (appSettings.NomeApi.IsNullEmptyOrWhiteSpace())
-            {
-                throw new SignaRegraNegocioException("Necessário incluir o nome da api");
-            }
-
-            Global.FuncaoId = appSettings.FuncaoId;
-            Global.NomeProjeto = appSettings.NomeApi;
+            _startupValidator.Validate(appSettings);
             #endregion
 
             #region :: JWT / Token / Auth ::
@@ -245,6 +249,8 @@ namespace Signa.TemplateCore.Api
 
             loggerFactory.AddSerilog();
 
+            app.UseMiddleware(typeof(ErrorHandlingMiddleware));
+
             #region :: Middleware Claims from JWT ::
             // DOC: https://www.wellingtonjhn.com/posts/obtendo-o-usu%C3%A1rio-logado-em-apis-asp.net-core/
             app.Use(async delegate (HttpContext httpContext, Func<Task> next)
@@ -253,8 +259,6 @@ namespace Signa.TemplateCore.Api
                 {
                     Global.UsuarioId = int.Parse(httpContext.User.Claims.Where(c => c.Type == "UserId").FirstOrDefault().Value);
                 }
-
-                Global.ConnectionString = Configuration["DATABASE_CONNECTION"];
 
                 await next.Invoke();
             });

@@ -1,16 +1,12 @@
-using System.Collections.Generic;
 using Dapper;
-using Microsoft.Extensions.Configuration;
+using Signa.Library.Core.Data.Repository;
 using Signa.TemplateCore.Api.Domain.Entities;
+using System.Collections.Generic;
 
 namespace Signa.TemplateCore.Api.Data.Repository
 {
     public class PessoaDAO : RepositoryBase
     {
-        public PessoaDAO(IConfiguration configuration)
-        {
-            base.configuration = configuration;
-        }
 
         public int Insert(PessoaEntity pessoa)
         {
