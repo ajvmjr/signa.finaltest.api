@@ -78,6 +78,35 @@ namespace Signa.TemplateCore.Api
             services.AddTransient<IValidator<PessoaModel>, PessoaValidator>();
             #endregion
 
+            #region :: Acesso a Dados / Dapper ::
+            services.AddTransient<PessoaDAO>();
+
+            DefaultTypeMap.MatchNamesWithUnderscores = true;
+            Dapper.SqlMapper.AddTypeMap(typeof(string), System.Data.DbType.AnsiString);
+            #endregion
+
+            #region :: Generic Classes ::
+            services.AddTransient<HelperRepository>();
+            #endregion
+
+            #region :: Business ::
+            services.AddTransient<PessoaBL>();
+            #endregion
+
+            #region :: AutoMapper ::
+            var config = new AutoMapper.MapperConfiguration(cfg =>
+            {
+                // TODO: seria possível deixar isso em outras classes?
+                cfg.CreateMap<PessoaEntity, PessoaModel>()
+                    .ForMember(d => d.CnpjCpf, s => s.MapFrom(x => x.IndicativoPfPj == "PF" ? x.PfCpf : x.PjCnpj))
+                    .ForMember(d => d.DataNascimentoFormatada, s => s.MapFrom(x => x.DataNascimento.ToString("dd/MM/yyyy HH:mm")))
+                    .ReverseMap();
+            });
+
+            IMapper mapper = config.CreateMapper();
+            services.AddSingleton(mapper);
+            #endregion
+
             #region :: Swagger ::
             //Necessário para a documentação do Swagger
             services.AddMvcCore().AddApiExplorer();
@@ -118,21 +147,6 @@ namespace Signa.TemplateCore.Api
             });
             #endregion
 
-            #region :: Acesso a Dados / Dapper ::
-            services.AddTransient<PessoaDAO>();
-
-            DefaultTypeMap.MatchNamesWithUnderscores = true;
-            Dapper.SqlMapper.AddTypeMap(typeof(string), System.Data.DbType.AnsiString);
-            #endregion
-
-            #region :: Generic Classes ::
-            services.AddTransient<HelperRepository>();
-            #endregion
-
-            #region :: Business ::
-            services.AddTransient<PessoaBL>();
-            #endregion
-
             #region :: Filters ::
             // TODO: deixar em uma inclusão apenas
             services.AddTransient<SignaRegraNegocioExceptionHandling>();
@@ -141,25 +155,10 @@ namespace Signa.TemplateCore.Api
             services.AddTransient<GenericExceptionHandling>();
             #endregion
 
-            #region :: AutoMapper ::
-            var config = new AutoMapper.MapperConfiguration(cfg =>
-            {
-                // TODO: seria possível deixar isso em outras classes?
-                cfg.CreateMap<PessoaEntity, PessoaModel>()
-                    .ForMember(d => d.CnpjCpf, s => s.MapFrom(x => x.IndicativoPfPj == "PF" ? x.PfCpf : x.PjCnpj))
-                    .ForMember(d => d.DataNascimentoFormatada, s => s.MapFrom(x => x.DataNascimento.ToString("dd/MM/yyyy HH:mm")))
-                    .ReverseMap();
-            });
-
-            IMapper mapper = config.CreateMapper();
-            services.AddSingleton(mapper);
-            #endregion
-
             #region :: AppSettings ::
             var appSettingsSection = Configuration.GetSection("AppSettings");
             services.Configure<AppSettings>(appSettingsSection);
 
-            // TODO: trocar pelo startup validator
             var appSettings = appSettingsSection.Get<AppSettings>();
 
 #if DEBUG
@@ -257,7 +256,11 @@ namespace Signa.TemplateCore.Api
             {
                 if (httpContext.User.Claims.Any())
                 {
-                    Global.UsuarioId = int.Parse(httpContext.User.Claims.Where(c => c.Type == "UserId").FirstOrDefault().Value);
+                    try
+                    {
+                        Global.UsuarioId = int.Parse(httpContext.User.Claims.Where(c => c.Type == "UserId").FirstOrDefault().Value);
+                    }
+                    catch (Exception) { }
                 }
 
                 await next.Invoke();
