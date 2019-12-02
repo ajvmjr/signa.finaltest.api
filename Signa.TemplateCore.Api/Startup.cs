@@ -256,7 +256,11 @@ namespace Signa.TemplateCore.Api
             {
                 if (httpContext.User.Claims.Any())
                 {
-                    Global.UsuarioId = int.Parse(httpContext.User.Claims.Where(c => c.Type == "UserId").FirstOrDefault().Value);
+                    try
+                    {
+                        Global.UsuarioId = int.Parse(httpContext.User.Claims.Where(c => c.Type == "UserId").FirstOrDefault().Value);
+                    }
+                    catch (Exception) { }
                 }
 
                 await next.Invoke();
