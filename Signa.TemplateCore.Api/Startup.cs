@@ -254,6 +254,16 @@ namespace Signa.TemplateCore.Api
             // DOC: https://www.wellingtonjhn.com/posts/obtendo-o-usu%C3%A1rio-logado-em-apis-asp.net-core/
             app.Use(async delegate (HttpContext httpContext, Func<Task> next)
             {
+                if (httpContext.Request.Headers.Any())
+                {
+                    try
+                    {
+                        Global.UsuarioId = int.Parse(httpContext.Request.Headers["UsuarioId"]);
+                        Global.EmpresaId = int.Parse(httpContext.Request.Headers["EmpresaId"]);
+                    }
+                    catch (Exception) { }
+                }
+
                 if (httpContext.User.Claims.Any())
                 {
                     try
