@@ -241,7 +241,6 @@ namespace Signa.TemplateCore.Api
             });
 
             app.UseRouting();
-            app.UseHttpsRedirection();
             app.UseResponseCompression();
             app.UseAuthentication();
             app.UseAuthorization();
