@@ -22,23 +22,19 @@ namespace Signa.TemplateCore.Api.Controllers
 
         [HttpPost]
         [Route("pessoa")]
-        [ProducesResponseType(type: typeof(PessoaModel), statusCode: 200)]
-        public IActionResult Insert(PessoaModel pessoa) => Ok(_pessoaBLL.Insert(pessoa));
+        public ActionResult<PessoaModel> Insert(PessoaModel pessoa) => Ok(_pessoaBLL.Insert(pessoa));
 
         [HttpGet]
         [Route("pessoa/{id}")]
-        [ProducesResponseType(type: typeof(PessoaModel), statusCode: 200)]
-        public IActionResult GetById(int id) => Ok(_pessoaBLL.GetById(id));
+        public ActionResult<PessoaModel> GetById(int id) => Ok(_pessoaBLL.GetById(id));
 
         [HttpGet]
         [Route("pessoa")]
-        [ProducesResponseType(type: typeof(IEnumerable<PessoaModel>), statusCode: 200)]
-        public IActionResult Get() => Ok(_pessoaBLL.Get());
+        public ActionResult<IEnumerable<PessoaModel>> Get() => Ok(_pessoaBLL.Get());
 
         [HttpDelete]
         [Route("pessoa/{id}")]
-        [ProducesResponseType(type: typeof(MessageReturnModel), statusCode: 200)]
-        public IActionResult DeletePessoa(int id)
+        public ActionResult<MessageReturnModel> DeletePessoa(int id)
         {
             _pessoaBLL.Delete(id);
             return Ok(new MessageReturnModel("Pessoa excluída com sucesso"));
