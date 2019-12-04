@@ -26,12 +26,10 @@ namespace Signa.TemplateCore.Api.Controllers
 
         [HttpGet]
         [Route("pessoa/{id}")]
-        [ProducesResponseType(type: typeof(PessoaModel), statusCode: 200)]
         public ActionResult<PessoaModel> GetById(int id) => Ok(_pessoaBLL.GetById(id));
 
         [HttpGet]
         [Route("pessoa")]
-        [ProducesResponseType(type: typeof(IEnumerable<PessoaModel>), statusCode: 200)]
         public ActionResult<IEnumerable<PessoaModel>> Get() => Ok(_pessoaBLL.Get());
 
         [HttpDelete]
