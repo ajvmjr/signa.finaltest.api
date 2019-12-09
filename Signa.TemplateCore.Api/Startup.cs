@@ -161,11 +161,6 @@ namespace Signa.TemplateCore.Api
 
             var appSettings = appSettingsSection.Get<AppSettings>();
 
-#if DEBUG
-            appSettings.NomeApi = "Signa.TemplateCore.Api";
-            appSettings.FuncaoId = 2;
-#endif
-
             _startupValidator.Validate(appSettings);
             #endregion
 

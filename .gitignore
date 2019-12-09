@@ -4,6 +4,7 @@ project.lock.json
 .DS_Store
 *.pyc
 nupkg/
+*.nupkg
 
 # Visual Studio Code
 .vscode
@@ -36,4 +37,8 @@ msbuild.wrn
 # Visual Studio 2015
 .vs/
 
+# Visual Studio Code
+.vscode/
+
+# Serilog
 logs/
