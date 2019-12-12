@@ -8,20 +8,12 @@ namespace Signa.TemplateCore.Api.Domain.Models
     {
         public int Id { get; set; }
 
-        [Required]
-        [MaxLength(255)]
         public string Nome { get; set; }
 
-        [Required]
-        [MaxLength(255)]
         public string NomeFantasia { get; set; }
 
-        [Required]
-        [MaxLength(19)]
         public string CnpjCpf { get; set; }
         
-        [Required]
-        [EmailAddress]
         public string Email { get; set; }
         public DateTime DataNascimento { get; set; }
         // DOC: você pode voltar a data no formato nativo - para utilizar objetos date - ou formatá-la
