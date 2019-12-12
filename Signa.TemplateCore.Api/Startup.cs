@@ -29,6 +29,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Reflection;
 using System.Threading.Tasks;
 
 namespace Signa.TemplateCore.Api
@@ -118,7 +119,7 @@ namespace Signa.TemplateCore.Api
                 options.SwaggerDoc("v1",
                     new OpenApiInfo
                     {
-                        Title = "Signa consultoria e Sistemas",
+                        Title = "Signa Consultoria e Sistemas",
                         Version = "v1",
                         Description = "API Template Signa",
                         Contact = new OpenApiContact
@@ -138,12 +139,9 @@ namespace Signa.TemplateCore.Api
                         Type = SecuritySchemeType.ApiKey
                     });
 
-                var xmlDocumentPath = Path.Combine(applicationBasePath, $"{applicationName}.xml");
-
-                if (File.Exists(xmlDocumentPath))
-                {
-                    options.IncludeXmlComments(xmlDocumentPath);
-                }
+                var xmlFile = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
+                var xmlPath = Path.Combine(AppContext.BaseDirectory, xmlFile);
+                options.IncludeXmlComments(xmlPath);
             });
             #endregion
 
