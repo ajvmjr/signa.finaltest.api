@@ -20,18 +20,32 @@ namespace Signa.TemplateCore.Api.Controllers
             _pessoaBLL = pessoaBLL;
         }
 
+        /// <summary>
+        /// Grava ou atualiza dados de Pessoa
+        /// </summary>
         [HttpPost]
         [Route("pessoa")]
         public ActionResult<PessoaModel> Insert(PessoaModel pessoa) => Ok(_pessoaBLL.Insert(pessoa));
 
+        /// <summary>
+        /// Busca uma pessoa através do ID
+        /// </summary>
+        /// <param name="id">ID da pessoa</param>
         [HttpGet]
         [Route("pessoa/{id}")]
         public ActionResult<PessoaModel> GetById(int id) => Ok(_pessoaBLL.GetById(id));
 
+        /// <summary>
+        /// Busca todas as pessoas na base de dados
+        /// </summary>
         [HttpGet]
         [Route("pessoa")]
         public ActionResult<IEnumerable<PessoaModel>> Get() => Ok(_pessoaBLL.Get());
 
+        /// <summary>
+        /// Exclui uma pessoa através do ID
+        /// </summary>
+        /// <param name="id">ID da pessoa</param>
         [HttpDelete]
         [Route("pessoa/{id}")]
         public ActionResult<MessageReturnModel> DeletePessoa(int id)
