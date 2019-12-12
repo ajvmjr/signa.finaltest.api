@@ -1,5 +1,4 @@
 using System;
-using System.ComponentModel.DataAnnotations;
 using FluentValidation;
 
 namespace Signa.TemplateCore.Api.Domain.Models
