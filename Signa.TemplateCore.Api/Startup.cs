@@ -252,6 +252,7 @@ namespace Signa.TemplateCore.Api
                     {
                         Global.UsuarioId = int.Parse(httpContext.Request.Headers["UsuarioId"]);
                         Global.EmpresaId = int.Parse(httpContext.Request.Headers["EmpresaId"]);
+                        Global.GrupoUsuarioId = int.Parse(httpContext.Request.Headers["GrupoUsuarioId"]);
                     }
                     catch (Exception) { }
                 }
