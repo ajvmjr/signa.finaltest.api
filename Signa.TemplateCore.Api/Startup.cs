@@ -81,6 +81,7 @@ namespace Signa.TemplateCore.Api
 
             #region :: Acesso a Dados / Dapper ::
             services.AddTransient<PessoaDAO>();
+            services.AddTransient<PermissaoUsuarioDAO>();
 
             DefaultTypeMap.MatchNamesWithUnderscores = true;
             Dapper.SqlMapper.AddTypeMap(typeof(string), System.Data.DbType.AnsiString);
@@ -92,6 +93,7 @@ namespace Signa.TemplateCore.Api
 
             #region :: Business ::
             services.AddTransient<PessoaBL>();
+            services.AddTransient<PermissaoUsuarioBL>();
             #endregion
 
             #region :: AutoMapper ::
@@ -101,6 +103,13 @@ namespace Signa.TemplateCore.Api
                 cfg.CreateMap<PessoaEntity, PessoaModel>()
                     .ForMember(d => d.CnpjCpf, s => s.MapFrom(x => x.IndicativoPfPj == "PF" ? x.PfCpf : x.PjCnpj))
                     .ForMember(d => d.DataNascimentoFormatada, s => s.MapFrom(x => x.DataNascimento.ToString("dd/MM/yyyy HH:mm")))
+                    .ReverseMap();
+
+                cfg.CreateMap<PermissaoUsuarioEntity, PermissaoUsuarioModel>()
+                    .ForMember(d => d.FlagPermissaoAcesso, s => s.MapFrom(x => "S".Equals(x.FlagPermissaoAcesso)))
+                    .ForMember(d => d.FlagPermissaoExclusao, s => s.MapFrom(x => "S".Equals(x.FlagPermissaoExclusao)))
+                    .ForMember(d => d.FlagPermissaoGravacao, s => s.MapFrom(x => "S".Equals(x.FlagPermissaoGravacao)))
+                    .ForMember(d => d.FlagPermissaoImpressao, s => s.MapFrom(x => "S".Equals(x.FlagPermissaoImpressao)))
                     .ReverseMap();
             });
 
