@@ -1,9 +1,9 @@
 using Dapper;
 using Signa.Library.Core.Data.Repository;
-using Signa.TemplateCore.Api.Domain.Entities;
+using Signa.FinalTest.Api.Data.Entities;
 using System.Collections.Generic;
 
-namespace Signa.TemplateCore.Api.Data.Repository
+namespace Signa.FinalTest.Api.Data.Repository
 {
     public class PessoaDAO : RepositoryBase
     {

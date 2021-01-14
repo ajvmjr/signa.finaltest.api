@@ -1,0 +1,25 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.30717.126
+MinimumVisualStudioVersion = 15.0.26124.0
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Signa.FinalTest.Api", "Signa.FinalTest.Api\Signa.FinalTest.Api.csproj", "{B72DF60D-F0DF-45C5-821B-C07CEC55945E}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{B72DF60D-F0DF-45C5-821B-C07CEC55945E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B72DF60D-F0DF-45C5-821B-C07CEC55945E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B72DF60D-F0DF-45C5-821B-C07CEC55945E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B72DF60D-F0DF-45C5-821B-C07CEC55945E}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {26EDE446-B2E3-4F1C-B92D-A3F34A1C0F66}
+	EndGlobalSection
+EndGlobal

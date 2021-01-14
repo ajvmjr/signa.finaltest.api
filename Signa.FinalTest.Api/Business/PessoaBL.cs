@@ -1,12 +1,12 @@
 using AutoMapper;
 using Signa.Library.Core.Exceptions;
 using Signa.Library.Core.Extensions;
-using Signa.TemplateCore.Api.Data.Repository;
-using Signa.TemplateCore.Api.Domain.Entities;
-using Signa.TemplateCore.Api.Domain.Models;
+using Signa.FinalTest.Api.Data.Repository;
+using Signa.FinalTest.Api.Data.Entities;
+using Signa.FinalTest.Api.Domain.Models;
 using System.Collections.Generic;
 
-namespace Signa.TemplateCore.Api.Business
+namespace Signa.FinalTest.Api.Business
 {
     public class PessoaBL
     {

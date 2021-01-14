@@ -1,11 +1,11 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Signa.Library.Core.Aspnet.Domain.Models;
-using Signa.TemplateCore.Api.Business;
-using Signa.TemplateCore.Api.Domain.Models;
+using Signa.FinalTest.Api.Business;
+using Signa.FinalTest.Api.Domain.Models;
 using System.Collections.Generic;
 
-namespace Signa.TemplateCore.Api.Controllers
+namespace Signa.FinalTest.Api.Controllers
 {
     [ApiController]
     [Produces("application/json")]
@@ -51,9 +51,9 @@ namespace Signa.TemplateCore.Api.Controllers
         /// <returns>Dados da pessoa incluída ou atualizada</returns>
         /// <response code="200">Pessoa criada ou atualizada</response>
         /// <response code="404">Erro na inserção ou atualização, pessoa não encontrada na busca para retornar os dados</response>
-        [HttpPost]
-        [Route("pessoa")]
-        public ActionResult<PessoaModel> Insert(PessoaModel pessoa) => Ok(_pessoaBLL.Insert(pessoa));
+        //[HttpPost]
+        //[Route("pessoa")]
+        //public ActionResult<PessoaModel> Insert(PessoaModel pessoa) => Ok(_pessoaBLL.Insert(pessoa));
 
         /// <summary>
         /// Busca uma pessoa através do ID
@@ -62,30 +62,30 @@ namespace Signa.TemplateCore.Api.Controllers
         /// <returns>Dados da pessoa</returns>
         /// <response code="200">Pessoa cadastrada na base de dados</response>
         /// <response code="404">Pessoa não encontrada na busca</response>
-        [HttpGet]
-        [Route("pessoa/{id}")]
-        public ActionResult<PessoaModel> GetById(int id) => Ok(_pessoaBLL.GetById(id));
+        //[HttpGet]
+        //[Route("pessoa/{id}")]
+        //public ActionResult<PessoaModel> GetById(int id) => Ok(_pessoaBLL.GetById(id));
 
         /// <summary>
         /// Busca todas as pessoas na base de dados
         /// </summary>
         /// <response code="200">Pessoas cadastradas na base de dados</response>
         /// <response code="404">Nenhuma pessoa encontrada na base de dados</response>
-        [HttpGet]
-        [Route("pessoa")]
-        public ActionResult<IEnumerable<PessoaModel>> Get() => Ok(_pessoaBLL.Get());
+        //[HttpGet]
+        //[Route("pessoa")]
+        //public ActionResult<IEnumerable<PessoaModel>> Get() => Ok(_pessoaBLL.Get());
 
         /// <summary>
         /// Exclui uma pessoa através do ID
         /// </summary>
         /// <param name="id">ID da pessoa</param>
         /// <response code="200">Mensagem de pessoa excluída com sucesso</response>
-        [HttpDelete]
-        [Route("pessoa/{id}")]
-        public ActionResult<MessageReturnModel> DeletePessoa(int id)
-        {
-            _pessoaBLL.Delete(id);
-            return Ok(new MessageReturnModel("Pessoa excluída com sucesso"));
-        }
+        //[HttpDelete]
+        //[Route("pessoa/{id}")]
+        //public ActionResult<MessageReturnModel> DeletePessoa(int id)
+        //{
+        //    _pessoaBLL.Delete(id);
+        //    return Ok(new MessageReturnModel("Pessoa excluída com sucesso"));
+        //}
     }
 }

@@ -1,7 +1,7 @@
 using System;
 using FluentValidation;
 
-namespace Signa.TemplateCore.Api.Domain.Models
+namespace Signa.FinalTest.Api.Domain.Models
 {
     public class PessoaModel
     {

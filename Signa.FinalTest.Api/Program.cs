@@ -4,7 +4,7 @@ using Microsoft.Extensions.Hosting;
 using Serilog;
 using Serilog.Events;
 
-namespace Signa.TemplateCore.Api
+namespace Signa.FinalTest.Api
 {
     public class Program
     {

@@ -2,14 +2,14 @@
 using Signa.Library.Core;
 using Signa.Library.Core.Exceptions;
 using Signa.Library.Core.Extensions;
-using Signa.TemplateCore.Api.Data.Repository;
-using Signa.TemplateCore.Api.Domain.Models;
+using Signa.FinalTest.Api.Data.Repository;
+using Signa.FinalTest.Api.Domain.Models;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace Signa.TemplateCore.Api.Business
+namespace Signa.FinalTest.Api.Business
 {
     public class PermissaoUsuarioBL
     {

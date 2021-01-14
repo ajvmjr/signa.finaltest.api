@@ -1,12 +1,12 @@
 ﻿using Dapper;
 using Signa.Library.Core.Data.Repository;
-using Signa.TemplateCore.Api.Domain.Entities;
+using Signa.FinalTest.Api.Data.Entities;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace Signa.TemplateCore.Api.Data.Repository
+namespace Signa.FinalTest.Api.Data.Repository
 {
     public class PermissaoUsuarioDAO : RepositoryBase
     {

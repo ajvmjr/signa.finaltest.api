@@ -1,6 +1,6 @@
 using System;
 
-namespace Signa.TemplateCore.Api.Domain.Entities
+namespace Signa.FinalTest.Api.Data.Entities
 {
     public class PessoaEntity
     {

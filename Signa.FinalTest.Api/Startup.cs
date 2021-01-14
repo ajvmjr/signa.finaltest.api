@@ -21,18 +21,21 @@ using Signa.Library.Core.Aspnet.Filters;
 using Signa.Library.Core.Aspnet.Filters.ErrorHandlings;
 using Signa.Library.Core.Aspnet.Helpers;
 using Signa.Library.Core.Data.Repository;
-using Signa.TemplateCore.Api.Business;
-using Signa.TemplateCore.Api.Data.Repository;
-using Signa.TemplateCore.Api.Domain.Entities;
-using Signa.TemplateCore.Api.Domain.Models;
+using Signa.FinalTest.Api.Business;
+using Signa.FinalTest.Api.Data.Repository;
+using Signa.FinalTest.Api.Data.Entities;
+using Signa.FinalTest.Api.Domain.Models;
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Threading.Tasks;
+using Signa.FinalTest.Api.Domain.Models.Response;
+using Signa.FinalTest.Api.Domain.Models.Request;
+using Signa.FinalTest.Api.Domain.Validators;
 
-namespace Signa.TemplateCore.Api
+namespace Signa.FinalTest.Api
 {
     public class Startup
     {
@@ -77,11 +80,13 @@ namespace Signa.TemplateCore.Api
             #region :: Validators ::
             // TODO: validações de banco no validador
             services.AddTransient<IValidator<PessoaModel>, PessoaValidator>();
+            services.AddTransient<IValidator<RepositoryTagRequest>, RepositoryTagValidator>();
             #endregion
 
             #region :: Acesso a Dados / Dapper ::
             services.AddTransient<PessoaDAO>();
             services.AddTransient<PermissaoUsuarioDAO>();
+            services.AddTransient<RepositoryDAO>();
 
             DefaultTypeMap.MatchNamesWithUnderscores = true;
             Dapper.SqlMapper.AddTypeMap(typeof(string), System.Data.DbType.AnsiString);
@@ -94,6 +99,7 @@ namespace Signa.TemplateCore.Api
             #region :: Business ::
             services.AddTransient<PessoaBL>();
             services.AddTransient<PermissaoUsuarioBL>();
+            services.AddTransient<RepositoryBL>();
             #endregion
 
             #region :: AutoMapper ::
@@ -111,6 +117,16 @@ namespace Signa.TemplateCore.Api
                     .ForMember(d => d.FlagPermissaoGravacao, s => s.MapFrom(x => "S".Equals(x.FlagPermissaoGravacao)))
                     .ForMember(d => d.FlagPermissaoImpressao, s => s.MapFrom(x => "S".Equals(x.FlagPermissaoImpressao)))
                     .ReverseMap();
+
+                cfg.CreateMap<RepositoryEntity, RepositoryResponse>().ReverseMap();
+                cfg.CreateMap<RepositoryRequest, RepositoryEntity>()
+                    .ForMember(d => d.RepositoryId, opt => opt.MapFrom(src => src.Id))
+                    .ForMember(d => d.RepositoryName, opt => opt.MapFrom(src => src.Name))
+                    .ForMember(d => d.RepositoryDescription, opt => opt.MapFrom(src => src.Description))
+                    .ForMember(d => d.RepositoryLanguage, opt => opt.MapFrom(src => src.Language))
+                    .ForMember(d => d.RepositoryUrlhttp, opt => opt.MapFrom(src => src.html_url));
+
+                cfg.CreateMap<RepositoryEntity, RepositoryTagRequest>().ReverseMap();
             });
 
             IMapper mapper = config.CreateMapper();

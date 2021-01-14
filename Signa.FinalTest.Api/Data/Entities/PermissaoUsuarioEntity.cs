@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace Signa.TemplateCore.Api.Domain.Entities
+namespace Signa.FinalTest.Api.Data.Entities
 {
     public class PermissaoUsuarioEntity
     {
